@@ -1,0 +1,31 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27018:27017"
+
+  backend:
+    build: ./BackEnd
+    container_name: backend
+    env_file:
+      - ./BackEnd/.env
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/ai_resume
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+
+  frontend:
+    build: ./FrontEnd
+    container_name: frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:

@@ -3,7 +3,7 @@ import axios from "axios";
 import { UserContext } from "../../Context/UserContext";
 import { Link, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
-import logo from "../../assets/logo.png"; // adjust path
+import logo from "../../assets/Logo.png"; // adjust path
 import loginImage from "../../assets/LogIn.png"; // Import the background image
 import avatar from "../../assets/man.png"; // Import the avatar image
 
