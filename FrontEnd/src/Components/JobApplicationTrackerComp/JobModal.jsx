@@ -1,18 +1,23 @@
-// src/Components/JobApplicationTrackerComp/JobModal.jsx
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import api from "../../services/api";
 
-export default function JobModal({ isOpen, job, onClose, onSave, user, visibleColumns = [] }) {
+export default function JobModal({ isOpen, job, onClose, onSave, user }) {
   const [formData, setFormData] = useState({
-    position: job?.position || '',
-    company: job?.company || '',
-    location: job?.location || '',
-    jobLink: job?.jobLink || '',
-    status: job?.status || 'Applied',
-    dateApplied: job?.dateApplied ? new Date(job.dateApplied).toISOString().split('T')[0] : '',
-    deadline: job?.deadline ? new Date(job.deadline).toISOString().split('T')[0] : '',
-    notes: job?.notes || '',
-    salary: job?.salary || ''
+    position: job?.position || "",
+    company: job?.company || "",
+    location: job?.location || "",
+    jobLink: job?.jobLink || "",
+    status: job?.status || "Applied",
+    dateApplied: job?.dateApplied
+      ? new Date(job.dateApplied).toISOString().split("T")[0]
+      : "",
+    deadline: job?.deadline
+      ? new Date(job.deadline).toISOString().split("T")[0]
+      : "",
+    notes: job?.notes || "",
+    salary: job?.salary || "",
   });
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,158 +25,194 @@ export default function JobModal({ isOpen, job, onClose, onSave, user, visibleCo
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    
+    setSubmitting(true);
     const cleanedData = {
       userId: user?._id,
-      ...formData
+      ...formData,
     };
-
     try {
-      const url = job 
-        ? `/api/jobs/${job._id}`
-        : '/api/jobs';
-      
-      const method = job ? 'PUT' : 'POST';
+      // Use clean /jobs endpoint since api has baseURL: /api
+      const url = job ? `/jobs/${job._id}` : "/jobs";
+      const apiMethod = job ? api.put : api.post;
+      await apiMethod(url, cleanedData);
 
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(cleanedData)
-      });
-
-      if (!res.ok) throw new Error(await res.json().error);
-      
       onSave();
       onClose();
     } catch (err) {
-      alert('Error: ' + err.message);
+      alert(
+        "Error saving job application: " +
+          (err.response?.data?.message || err.message),
+      );
+    } finally {
+      setSubmitting(false);
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 border border-gray-700 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-white">
-              {job ? 'Edit Job Application' : 'Add New Job Application'}
-            </h2>
-            <button 
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-zinc-900 border border-black/[0.08] dark:border-white/[0.1] rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+        <div className="p-6 sm:p-8">
+          <div className="flex justify-between items-center mb-6 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
+            <div>
+              <h2 className="font-['Outfit'] text-2xl font-bold text-[#1a1a1a] dark:text-zinc-100">
+                {job ? "Edit Job Application" : "Log New Application"}
+              </h2>
+              <p className="text-xs text-[#8e8e8e] dark:text-zinc-400 mt-0.5">
+                Track interview progress, deadlines, and ATS compliance notes.
+              </p>
+            </div>
+            <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white"
+              className="w-8 h-8 rounded-full bg-[#EDEEF5] dark:bg-zinc-800 flex items-center justify-center text-[#8e8e8e] dark:text-zinc-400 hover:text-[#1a1a1a] dark:hover:text-zinc-100 transition"
             >
               ✕
             </button>
           </div>
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Required core fields */}
-              <input
-                name="position"
-                value={formData.position}
-                onChange={handleChange}
-                placeholder="Job Position *"
-                className="p-3 bg-gray-900 border border-gray-700 rounded text-white placeholder-gray-500"
-                required
-              />
-              <input
-                name="company"
-                value={formData.company}
-                onChange={handleChange}
-                placeholder="Company *"
-                className="p-3 bg-gray-900 border border-gray-700 rounded text-white placeholder-gray-500"
-                required
-              />
 
-              {/* Optional fields follow visibility */}
-              {visibleColumns.includes('location') && (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-[#8e8e8e] dark:text-zinc-400 mb-1.5 uppercase tracking-wider font-mono">
+                  Position / Role *
+                </label>
                 <input
-                  name="location"
-                  value={formData.location}
+                  type="text"
+                  name="position"
+                  required
+                  placeholder="e.g. Senior Software Engineer"
+                  value={formData.position}
                   onChange={handleChange}
-                  placeholder="Location"
-                  className="p-3 bg-gray-900 border border-gray-700 rounded text-white placeholder-gray-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#EDEEF5]/60 dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-[#1a1a1a] dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-[#1a1a1a] dark:focus:border-zinc-400 focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 text-xs transition"
                 />
-              )}
-              {visibleColumns.includes('url') && (
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#8e8e8e] dark:text-zinc-400 mb-1.5 uppercase tracking-wider font-mono">
+                  Company *
+                </label>
                 <input
-                  name="jobLink"
-                  value={formData.jobLink}
+                  type="text"
+                  name="company"
+                  required
+                  placeholder="e.g. Stripe, Linear, Google"
+                  value={formData.company}
                   onChange={handleChange}
-                  placeholder="Job URL"
-                  className="p-3 bg-gray-900 border border-gray-700 rounded text-white placeholder-gray-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#EDEEF5]/60 dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-[#1a1a1a] dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-[#1a1a1a] dark:focus:border-zinc-400 focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 text-xs transition"
                 />
-              )}
-              {visibleColumns.includes('salary') && (
-                <input
-                  name="salary"
-                  value={formData.salary}
-                  onChange={handleChange}
-                  placeholder="Salary"
-                  className="p-3 bg-gray-900 border border-gray-700 rounded text-white placeholder-gray-500"
-                />
-              )}
-              {visibleColumns.includes('dateApplied') && (
-                <input
-                  name="dateApplied"
-                  type="date"
-                  value={formData.dateApplied}
-                  onChange={handleChange}
-                  className="p-3 bg-gray-900 border border-gray-700 rounded text-white"
-                />
-              )}
-              <input
-                name="deadline"
-                type="date"
-                value={formData.deadline}
-                onChange={handleChange}
-                className="p-3 bg-gray-900 border border-gray-700 rounded text-white"
-              />
-              {visibleColumns.includes('status') && (
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-[#8e8e8e] dark:text-zinc-400 mb-1.5 uppercase tracking-wider font-mono">
+                  Status
+                </label>
                 <select
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
-                  className="p-3 bg-gray-900 border border-gray-700 rounded text-white"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#EDEEF5]/60 dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-[#1a1a1a] dark:text-zinc-100 focus:outline-none focus:border-[#1a1a1a] dark:focus:border-zinc-400 focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 text-xs transition cursor-pointer"
                 >
-                  <option value="Applied">Applied</option>
-                  <option value="Interview">Interview</option>
-                  <option value="Offer">Offer</option>
-                  <option value="Rejected">Rejected</option>
-                  <option value="Ghosted">Ghosted</option>
+                  <option value="Applied" className="bg-white dark:bg-zinc-900 text-[#1a1a1a] dark:text-zinc-100">Applied</option>
+                  <option value="Interviewing" className="bg-white dark:bg-zinc-900 text-[#1a1a1a] dark:text-zinc-100">Interviewing</option>
+                  <option value="Offer" className="bg-white dark:bg-zinc-900 text-[#1a1a1a] dark:text-zinc-100">Offer</option>
+                  <option value="Rejected" className="bg-white dark:bg-zinc-900 text-[#1a1a1a] dark:text-zinc-100">Rejected</option>
+                  <option value="Saved" className="bg-white dark:bg-zinc-900 text-[#1a1a1a] dark:text-zinc-100">Saved</option>
                 </select>
-              )}
               </div>
-            {visibleColumns.includes('notes') && (
+
+              <div>
+                <label className="block text-xs font-medium text-[#8e8e8e] dark:text-zinc-400 mb-1.5 uppercase tracking-wider font-mono">
+                  Location
+                </label>
+                <input
+                  type="text"
+                  name="location"
+                  placeholder="Remote / San Francisco"
+                  value={formData.location}
+                  onChange={handleChange}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#EDEEF5]/60 dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-[#1a1a1a] dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-[#1a1a1a] dark:focus:border-zinc-400 focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 text-xs transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#8e8e8e] dark:text-zinc-400 mb-1.5 uppercase tracking-wider font-mono">
+                  Salary / Compensation
+                </label>
+                <input
+                  type="text"
+                  name="salary"
+                  placeholder="$160k - $190k"
+                  value={formData.salary}
+                  onChange={handleChange}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#EDEEF5]/60 dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-[#1a1a1a] dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-[#1a1a1a] dark:focus:border-zinc-400 focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 text-xs transition"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-[#8e8e8e] dark:text-zinc-400 mb-1.5 uppercase tracking-wider font-mono">
+                  Date Applied
+                </label>
+                <input
+                  type="date"
+                  name="dateApplied"
+                  value={formData.dateApplied}
+                  onChange={handleChange}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#EDEEF5]/60 dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-[#1a1a1a] dark:text-zinc-100 focus:outline-none focus:border-[#1a1a1a] dark:focus:border-zinc-400 focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 text-xs transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#8e8e8e] dark:text-zinc-400 mb-1.5 uppercase tracking-wider font-mono">
+                  Job URL Link
+                </label>
+                <input
+                  type="url"
+                  name="jobLink"
+                  placeholder="https://company.com/careers/..."
+                  value={formData.jobLink}
+                  onChange={handleChange}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#EDEEF5]/60 dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-[#1a1a1a] dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-[#1a1a1a] dark:focus:border-zinc-400 focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 text-xs transition"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-[#8e8e8e] dark:text-zinc-400 mb-1.5 uppercase tracking-wider font-mono">
+                Notes & ATS Keywords
+              </label>
               <textarea
                 name="notes"
+                rows={3}
+                placeholder="Key recruiter contact, missing keywords, preparation questions..."
                 value={formData.notes}
                 onChange={handleChange}
-                placeholder="Notes"
-                className="w-full p-3 bg-gray-900 border border-gray-700 rounded text-white placeholder-gray-500"
-                rows="4"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#EDEEF5]/60 dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-[#1a1a1a] dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-[#1a1a1a] dark:focus:border-zinc-400 focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 text-xs transition"
               />
-            )}
-            <div className="flex justify-end gap-3 pt-4">
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-black/[0.06] dark:border-white/[0.08]">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
+                className="px-5 py-2.5 border border-black/[0.1] dark:border-white/[0.1] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-[#1a1a1a] dark:text-zinc-200 text-xs font-medium rounded-full transition"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+                disabled={submitting}
+                className="px-6 py-2.5 bg-[#1a1a1a] hover:bg-black dark:bg-[#9fff00] dark:hover:bg-[#8fee00] text-white dark:text-black text-xs font-semibold rounded-full shadow-xs transition hover:scale-[1.02] disabled:opacity-50"
               >
-                {job ? 'Update' : 'Save'}
+                {submitting
+                  ? "Saving..."
+                  : job
+                    ? "Update Application"
+                    : "Log Application"}
               </button>
             </div>
           </form>

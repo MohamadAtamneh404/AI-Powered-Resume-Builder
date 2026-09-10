@@ -1,6 +1,8 @@
 // src/context/UserContext.jsx
 import React, { createContext, useState, useEffect } from "react";
-import axios from "axios";
+import { auth } from "../services/firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import api from "../services/api";
 
 export const UserContext = createContext();
 
@@ -8,47 +10,45 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setUser(null);
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      localStorage.removeItem("token");
+      setUser(null);
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
   };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const res = await axios.get("http://localhost:3000/api/users/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUser(res.data);
-      } catch (err) {
-        console.error(err);
-        logout();
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-
-    const interceptor = axios.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response && error.response.status === 401) {
-          logout();
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const token = await firebaseUser.getIdToken();
+          localStorage.setItem("token", token);
+          
+          // Optionally, sync with backend
+          // We can call /users/me just to fetch any MongoDB-specific profile info
+          // but for basic usage we just set the user state.
+          try {
+            const res = await api.get("/users/me");
+            setUser({ ...firebaseUser, ...res.data });
+          } catch (e) {
+            // Backend might not have the user yet if they just registered, handled in signup
+            setUser(firebaseUser);
+          }
+        } catch (err) {
+          console.error("Auth state change error:", err);
+          setUser(null);
         }
-        return Promise.reject(error);
+      } else {
+        localStorage.removeItem("token");
+        setUser(null);
       }
-    );
+      setLoading(false);
+    });
 
-    return () => {
-      axios.interceptors.response.eject(interceptor);
-    };
+    return () => unsubscribe();
   }, []);
 
   return (
@@ -56,4 +56,12 @@ export const UserProvider = ({ children }) => {
       {children}
     </UserContext.Provider>
   );
+};
+
+export const useUser = () => {
+  const context = React.useContext(UserContext);
+  if (!context) {
+    throw new Error("useUser must be used within a UserProvider");
+  }
+  return context;
 };

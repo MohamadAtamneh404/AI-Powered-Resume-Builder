@@ -22,7 +22,9 @@
    * Reset layout for printing. Flex and Grid can interfere with page breaks.
    * We force the main containers to be simple block elements.
    */
-  .page, .resume-main, .resume-sidebar {
+  .page,
+  .resume-main,
+  .resume-sidebar {
     display: block !important;
     height: auto !important;
     min-height: initial !important;
@@ -48,7 +50,10 @@
    * `orphans`: min lines to leave at the bottom of a page.
    * `widows`: min lines to carry over to the top of a new page.
    */
-  p, ul, ol, li {
+  p,
+  ul,
+  ol,
+  li {
     orphans: 3;
     widows: 3;
   }

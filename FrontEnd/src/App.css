@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
-
 .liquid-ether-container {
   position: relative;
   overflow: hidden;
@@ -27,8 +26,14 @@ body {
 }
 
 .scroll-stack-inner {
-  padding: 20vh 5rem 50rem;
+  padding: 20vh 1rem 50rem;
   min-height: 100vh;
+}
+
+@media (min-width: 640px) {
+  .scroll-stack-inner {
+    padding: 20vh 5rem 50rem;
+  }
 }
 
 .scroll-stack-card-wrapper {
@@ -44,13 +49,19 @@ body {
   height: 20rem;
   width: 100%;
   margin: 30px 0;
-  padding: 3rem;
-  border-radius: 40px;
+  padding: 1.5rem;
+  border-radius: 20px;
   box-sizing: border-box;
-  /* Improve mobile performance */
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
   position: relative;
+}
+
+@media (min-width: 640px) {
+  .scroll-stack-card {
+    padding: 3rem;
+    border-radius: 40px;
+  }
 }
 
 .scroll-stack-end {
@@ -69,7 +80,9 @@ body {
 }
 
 .resume-example-image {
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  transition:
+    transform 0.3s ease-in-out,
+    box-shadow 0.3s ease-in-out;
 }
 
 .resume-example-image:hover {

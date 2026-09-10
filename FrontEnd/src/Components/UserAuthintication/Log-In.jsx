@@ -1,96 +1,207 @@
-import { useContext } from "react";
-import axios from "axios";
-import { UserContext } from "../../Context/UserContext";
+import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import React, { useState } from "react";
-import logo from "../../assets/Logo.png"; // adjust path
-import loginImage from "../../assets/LogIn.png"; // Import the background image
-import avatar from "../../assets/man.png"; // Import the avatar image
+import { motion } from "framer-motion";
+import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../services/firebase";
+import api from "../../services/api";
+import { UserContext } from "../../Context/UserContext";
+import Logo from "../common/Logo";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { setUser } = useContext(UserContext);
-   const [photo, setPhoto] = useState(null);
+
+  const validateEmail = () => {
+    if (!email) {
+      setEmailError("Email is required");
+      return false;
+    }
+    setEmailError("");
+    return true;
+  };
+
+  const validatePassword = () => {
+    if (!password) {
+      setPasswordError("Password is required");
+      return false;
+    }
+    setPasswordError("");
+    return true;
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    const isEmailValid = validateEmail();
+    const isPasswordValid = validatePassword();
+
+    if (!isEmailValid || !isPasswordValid) return;
+
+    setLoading(true);
+    setError("");
     try {
-      const res = await axios.post("http://localhost:3000/api/users/login", { email, password });
-      const token = res.data.token;
-      localStorage.setItem("token", token); // save token
-      // Fetch full user info
-      const userRes = await axios.get("http://localhost:3000/api/users/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUser(userRes.data); // set user in context
-      navigate("/Dashboard"); // redirect to Job Tracker
+      await signInWithEmailAndPassword(auth, email, password);
+      // Firebase auth listener in UserContext handles the rest
+      navigate("/Dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
-  
 
   return (
-    <div className="flex min-h-screen">
-      {/* Left: Image */}
-      <div
-        className="w-1/2 hidden md:block bg-cover bg-center"
-        style={{ backgroundImage: `url(${loginImage})` }} // Use the imported variable
-      />
+    <div className="min-h-screen bg-bg-base selection:bg-brand-green selection:text-black flex items-center justify-center relative overflow-hidden font-sans text-zinc-900">
+      {/* Animated Background Gradients */}
+      <div className="absolute inset-0 pointer-events-none">
+        <motion.div
+          animate={{ x: [0, 100, 0], y: [0, -50, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute top-[10%] left-[20%] w-[400px] h-[400px] bg-purple-600/20 rounded-full blur-[100px]"
+        />
+        <motion.div
+          animate={{ x: [0, -100, 0], y: [0, 50, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+          className="absolute bottom-[10%] right-[20%] w-[350px] h-[350px] bg-indigo-600/20 rounded-full blur-[100px]"
+        />
+      </div>
 
-      {/* Right: Form */}
-      <div className="flex flex-1 flex-col items-center justify-center bg-gray-900/90">
-        <Link to="/" className="mb-8">
-          <img src={logo} alt="ResuAI Logo" className="h-30 w-auto cursor-pointer" />
-        </Link>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative z-10 w-full max-w-md p-8 sm:p-10"
+      >
+        <div className="flex justify-center mb-10">
+          <Link
+            to="/"
+            className="inline-block transition-transform hover:scale-105"
+          >
+            <Logo size="lg" />
+          </Link>
+        </div>
 
-        <div className="w-full max-w-md p-8">
-          <h2 className="text-3xl font-bold text-white mb-6 text-center">Welcome Back</h2>
-          <p className="text-gray-300 mb-8 text-center">Login to access your dashboard</p>
+        <div className="bg-white border border-black/[0.06] rounded-3xl p-8 sm:p-10 shadow-sm relative overflow-hidden">
+          {/* Subtle top glare */}
 
-          {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
+          <div className="text-center mb-8">
+            <h2 className="font-['Outfit'] text-3xl font-bold text-[#1a1a1a] mb-2">
+              Welcome Back
+            </h2>
+            <p className="text-[#8e8e8e] text-sm">
+              Sign in to continue to your dashboard
+            </p>
+          </div>
 
-          <form className="space-y-6" onSubmit={handleLogin}>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-xl mb-6 text-center"
+            >
+              {error}
+            </motion.div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block text-gray-300 mb-1">Email</label>
-              <input
-                type="email"
-                placeholder="you@example.com"
-                className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+              <label className="block text-xs font-medium text-[#8e8e8e] mb-1.5 uppercase tracking-wider font-mono">
+                Email Address
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                  <Mail size={18} />
+                </div>
+                <input
+                  type="email"
+                  name="email"
+                  id="login-email"
+                  autoComplete="email"
+                  inputMode="email"
+                  placeholder="you@example.com"
+                  className={`w-full pl-10 pr-4 py-3.5 rounded-xl bg-[#EDEEF5]/60 border transition-all outline-none focus:ring-1 text-[#1a1a1a] ${
+                    emailError
+                      ? "border-red-500/50 focus:ring-red-500/20"
+                      : "border-black/[0.08] focus:border-[#1a1a1a] focus:ring-black/10"
+                  } text-[#1a1a1a] placeholder:text-zinc-400`}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onBlur={validateEmail}
+                  disabled={loading}
+                />
+              </div>
+              {emailError && (
+                <p className="text-red-400 text-xs mt-1.5 ml-1">{emailError}</p>
+              )}
             </div>
 
             <div>
-              <label className="block text-gray-300 mb-1">Password</label>
-              <input
-                type="password"
-                placeholder="********"
-                className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <label className="block text-xs font-medium text-[#8e8e8e] mb-1.5 uppercase tracking-wider font-mono">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                  <Lock size={18} />
+                </div>
+                <input
+                  type="password"
+                  name="password"
+                  id="login-password"
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                  className={`w-full pl-10 pr-4 py-3.5 rounded-xl bg-[#EDEEF5]/60 border transition-all outline-none focus:ring-1 text-[#1a1a1a] ${
+                    passwordError
+                      ? "border-red-500/50 focus:ring-red-500/20"
+                      : "border-black/[0.08] focus:border-[#1a1a1a] focus:ring-black/10"
+                  } placeholder:text-zinc-400`}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onBlur={validatePassword}
+                  disabled={loading}
+                />
+              </div>
+              {passwordError && (
+                <p className="text-red-400 text-xs mt-1.5 ml-1">
+                  {passwordError}
+                </p>
+              )}
             </div>
 
             <button
               type="submit"
-              className="w-full py-3 rounded-lg bg-purple-600 hover:bg-purple-700 transition text-white font-semibold"
+              disabled={loading}
+              className="w-full relative group py-3.5 mt-2 rounded-xl bg-white text-black font-semibold flex justify-center items-center overflow-hidden transition-all hover:bg-slate-200 active:scale-[0.98]"
             >
-              Log In
+              {loading ? (
+                <Loader2 className="animate-spin text-slate-600" size={20} />
+              ) : (
+                <span className="flex items-center gap-2">
+                  Sign In{" "}
+                  <ArrowRight
+                    size={18}
+                    className="group-hover:translate-x-1 transition-transform"
+                  />
+                </span>
+              )}
             </button>
           </form>
 
-          <p className="text-gray-400 text-center mt-6">
-            Don't have an account? <Link to="/register" className="text-purple-500 hover:underline">Sign Up</Link>
+          <p className="text-slate-400 text-sm text-center mt-8">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="text-[#1a1a1a]  hover:text-purple-400 transition-colors"
+            >
+              Sign Up
+            </Link>
           </p>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

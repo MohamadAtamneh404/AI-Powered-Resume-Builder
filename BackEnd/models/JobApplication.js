@@ -1,69 +1,69 @@
 // models/JobApplication.js
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const jobApplicationSchema = new mongoose.Schema(
   {
-    userId: { 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: 'User', 
-      required: true 
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     company: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     position: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     location: {
       type: String,
-      default: ''
+      default: "",
     },
     jobLink: {
       type: String,
-      default: ''
+      default: "",
     },
     status: {
       type: String,
-      enum: ['Applied', 'Interview', 'Offer', 'Rejected', 'Ghosted'],
-      default: 'Applied'
+      enum: ["Applied", "Interview", "Offer", "Rejected", "Ghosted"],
+      default: "Applied",
     },
     dateApplied: {
       type: Date,
-      default: Date.now
+      default: Date.now,
     },
     deadline: {
       type: Date,
-      default: null
+      default: null,
     },
     notes: {
       type: String,
-      default: ''
+      default: "",
     },
     salary: {
       type: String,
-      default: ''
-    } ,
+      default: "",
+    },
     archived: {
-    type: Boolean,
-    default: false
+      type: Boolean,
+      default: false,
+    },
+    // Add these for better stats:
+    interviewDate: {
+      type: Date,
+      default: null,
+    },
+    offerDate: {
+      type: Date,
+      default: null,
+    },
   },
-  // Add these for better stats:
-  interviewDate: {
-    type: Date,
-    default: null
-  },
-  offerDate: {
-    type: Date,
-    default: null
-  }
-}, 
   {
-    timestamps: true
-  }
+    timestamps: true,
+  },
 );
 
-module.exports = mongoose.model('JobApplication', jobApplicationSchema);
+module.exports = mongoose.model("JobApplication", jobApplicationSchema);

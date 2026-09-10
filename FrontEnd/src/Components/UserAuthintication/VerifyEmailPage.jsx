@@ -1,22 +1,24 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../services/api";
 
 const VerifyEmailContent = ({ email, onClose, setUser }) => {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setMessage('');
+    setError("");
+    setMessage("");
 
-    if (!email) return setError('Email not found.');
+    if (!email) return setError("Email not found.");
 
+    setLoading(true);
     try {
-      const res = await axios.post("http://localhost:3000/api/users/verify-email", {
+      const res = await api.post("/users/verify-email", {
         email,
         verificationCode: code,
       });
@@ -28,9 +30,7 @@ const VerifyEmailContent = ({ email, onClose, setUser }) => {
       localStorage.setItem("token", token); // Save token
 
       // Fetch full user info using the new token
-      const userRes = await axios.get("http://localhost:3000/api/users/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const userRes = await api.get("/users/me");
 
       setUser(userRes.data); // Set user in global context
 
@@ -42,8 +42,9 @@ const VerifyEmailContent = ({ email, onClose, setUser }) => {
       // --- End Auto-Login Logic ---
     } catch (err) {
       setError(
-        err.response?.data?.message || "Verification failed. Please try again."
+        err.response?.data?.message || "Verification failed. Please try again.",
       );
+      setLoading(false);
     }
   };
 
@@ -66,13 +67,15 @@ const VerifyEmailContent = ({ email, onClose, setUser }) => {
           value={code}
           onChange={(e) => setCode(e.target.value)}
           required
+          disabled={loading || !!message}
           className="w-full px-3 py-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
         <button
           type="submit"
-          className="w-full py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold transition"
+          disabled={loading || !!message}
+          className="w-full py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold transition flex justify-center items-center"
         >
-          Verify & Log In
+          {loading ? "Verifying..." : "Verify & Log In"}
         </button>
       </form>
     </>
