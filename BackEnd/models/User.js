@@ -49,6 +49,42 @@ const userSchema = new mongoose.Schema(
       atsScans: { type: Number, default: 0 },
       billingCycleStart: { type: Date, default: Date.now },
     },
+    careerProfile: {
+      targetRole: { type: String, default: "" },
+      seniority: { type: String, default: "" },
+      bio: { type: String, default: "" },
+      phone: { type: String, default: "" },
+      location: { type: String, default: "" },
+      linkedin: { type: String, default: "" },
+      github: { type: String, default: "" },
+      website: { type: String, default: "" },
+      skills: [{ type: String }],
+      experiences: [
+        {
+          company: { type: String, default: "" },
+          position: { type: String, default: "" },
+          startDate: { type: String, default: "" },
+          endDate: { type: String, default: "" },
+          highlights: [{ type: String }],
+        },
+      ],
+      education: [
+        {
+          institution: { type: String, default: "" },
+          degree: { type: String, default: "" },
+          startDate: { type: String, default: "" },
+          endDate: { type: String, default: "" },
+        },
+      ],
+      projects: [
+        {
+          name: { type: String, default: "" },
+          description: { type: String, default: "" },
+          technologies: [{ type: String }],
+          url: { type: String, default: "" },
+        },
+      ],
+    },
   },
   { timestamps: true },
 );

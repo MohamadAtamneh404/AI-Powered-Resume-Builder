@@ -18,7 +18,10 @@ import ResumeRenderer, {
 } from "../../ResumeTemplates/ResumeRenderer";
 import { AtsCopilotDrawer, AiAssistantDrawer } from "../EditorUI";
 import OnboardingModal from "../OnboardingModal";
+import NewResumeModal from "../NewResumeModal";
 import { calculateAtsScore } from "../../../Utility/atsScoreEngine";
+import { useUser } from "../../../Context/UserContext";
+import { CheckCircle2 } from "lucide-react";
 
 // ─── Block Definitions & Templates (mirrored from legacy) ─────────────
 
@@ -650,6 +653,8 @@ export default function ResumeEditorPage() {
   const [showAiAssistant, setShowAiAssistant] = useState(false);
   const [fixingPartId, setFixingPartId] = useState(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showNewResumeModal, setShowNewResumeModal] = useState(false);
+  const [hasPromptedNewModal, setHasPromptedNewModal] = useState(false);
 
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
@@ -659,6 +664,300 @@ export default function ResumeEditorPage() {
   const [resumeId, setResumeId] = useState(null);
   const [lastSavedAt, setLastSavedAt] = useState(null);
   const [rendering, setRendering] = useState(false);
+
+  const { user } = useUser();
+  const [aiPatchNotification, setAiPatchNotification] = useState("");
+
+  const syncCareerProfile = useCallback((profile = null) => {
+    const cp = profile || user?.careerProfile;
+    if (!cp) return;
+
+    setBasics((prev) => ({
+      ...prev,
+      name: cp.fullName || user?.fullName || prev.name || "",
+      email: cp.email || user?.email || prev.email || "",
+      phone: cp.phone || prev.phone || "",
+      label: cp.targetRole || prev.label || "",
+      summary: cp.bio || prev.summary || "",
+      location: {
+        ...(prev.location || {}),
+        city: cp.location || prev.location?.city || "",
+      },
+      profiles: [
+        ...(cp.linkedin ? [{ network: "LinkedIn", url: cp.linkedin, username: cp.linkedin.split("/").filter(Boolean).pop() || "" }] : []),
+        ...(cp.github ? [{ network: "GitHub", url: cp.github, username: cp.github.split("/").filter(Boolean).pop() || "" }] : []),
+      ],
+    }));
+
+    if (cp.targetRole) {
+      setResumeName(`${cp.targetRole} Resume`);
+    }
+
+    setBlocks((prev) => {
+      let next = [...prev];
+      if (!next.some((b) => b.type === "header")) {
+        next.unshift(TEMPLATES.header());
+      }
+
+      if (cp.bio) {
+        const idx = next.findIndex((b) => b.type === "summary");
+        if (idx !== -1) {
+          next[idx] = { ...next[idx], content: cp.bio };
+        } else {
+          next.push({ type: "summary", title: "Summary", content: cp.bio });
+        }
+      }
+
+      if (Array.isArray(cp.skills) && cp.skills.length > 0) {
+        const idx = next.findIndex((b) => b.type === "skills");
+        if (idx !== -1) {
+          next[idx] = {
+            ...next[idx],
+            groups: [{ name: "Key Skills", keywords: cp.skills }],
+          };
+        } else {
+          next.push({
+            type: "skills",
+            title: "Skills",
+            groups: [{ name: "Key Skills", keywords: cp.skills }],
+          });
+        }
+      }
+
+      if (Array.isArray(cp.experiences) && cp.experiences.length > 0) {
+        const expEntries = cp.experiences.map((e) => ({
+          company: e.company || "",
+          position: e.position || "",
+          startDate: e.startDate || "",
+          endDate: e.endDate || "",
+          highlights: e.highlights || [],
+          summary: (e.highlights || []).join("\n"),
+        }));
+        const idx = next.findIndex((b) => b.type === "work");
+        if (idx !== -1) {
+          next[idx] = {
+            ...next[idx],
+            entries: expEntries,
+          };
+        } else {
+          next.push({
+            type: "work",
+            title: "Experience",
+            entries: expEntries,
+          });
+        }
+      }
+
+      if (Array.isArray(cp.education) && cp.education.length > 0) {
+        const eduEntries = cp.education.map((edu) => ({
+          institution: edu.institution || "",
+          studyType: edu.degree || "",
+          startDate: edu.startDate || "",
+          endDate: edu.endDate || "",
+        }));
+        const idx = next.findIndex((b) => b.type === "education");
+        if (idx !== -1) {
+          next[idx] = {
+            ...next[idx],
+            entries: eduEntries,
+          };
+        } else {
+          next.push({
+            type: "education",
+            title: "Education",
+            entries: eduEntries,
+          });
+        }
+      }
+
+      if (Array.isArray(cp.projects) && cp.projects.length > 0) {
+        const projEntries = cp.projects.map((p) => ({
+          name: p.name || "",
+          description: p.description || "",
+          technologies: p.technologies ? (Array.isArray(p.technologies) ? p.technologies : [p.technologies]) : [],
+          url: p.url || "",
+          highlights: p.description ? [p.description] : [],
+        }));
+        const idx = next.findIndex((b) => b.type === "projects");
+        if (idx !== -1) {
+          next[idx] = {
+            ...next[idx],
+            entries: projEntries,
+          };
+        } else {
+          next.push({
+            type: "projects",
+            title: "Projects",
+            entries: projEntries,
+          });
+        }
+      }
+
+      return next;
+    });
+
+    setSaveStatus("unsaved");
+    setAiPatchNotification("✅ Synced from Master Career Profile!");
+    setTimeout(() => setAiPatchNotification(""), 3500);
+  }, [user]);
+
+  // Load parsed resume from upload into canvas
+  const handleUploadParsedResume = useCallback((profile) => {
+    if (!profile) return;
+
+    // Normalize personal / basics
+    const personal = profile.personal || profile.basics || {};
+    const name = personal.fullName || personal.name || "";
+    const label = personal.targetTitle || personal.label || "";
+    const email = personal.email || "";
+    const phone = personal.phone || "";
+    const url = personal.website || personal.url || "";
+    const city = typeof personal.location === "object" ? personal.location.city || "" : personal.location || "";
+    const profiles = Array.isArray(personal.profiles)
+      ? personal.profiles
+      : [
+          ...(personal.linkedin ? [{ network: "LinkedIn", url: personal.linkedin, username: personal.linkedin.split("/").filter(Boolean).pop() || "" }] : []),
+          ...(personal.github ? [{ network: "GitHub", url: personal.github, username: personal.github.split("/").filter(Boolean).pop() || "" }] : []),
+        ];
+
+    setBasics((prev) => ({
+      ...prev,
+      name: name || prev.name || "",
+      label: label || prev.label || "",
+      email: email || prev.email || "",
+      phone: phone || prev.phone || "",
+      url: url || prev.url || "",
+      location: {
+        ...(prev.location || {}),
+        city: city || prev.location?.city || "",
+      },
+      profiles: profiles.length > 0 ? profiles : prev.profiles || [],
+    }));
+
+    if (label || name) {
+      setResumeName(`${name ? name + " - " : ""}${label || "Resume"}`);
+    }
+
+    const newBlocks = [TEMPLATES.header()];
+
+    // Summary
+    const summaryText = typeof profile.summary === "string" ? profile.summary : personal.summary || "";
+    if (summaryText) {
+      newBlocks.push({
+        type: "summary",
+        title: "Summary",
+        content: summaryText,
+      });
+    }
+
+    // Work Experience
+    const rawWork = profile.workExperience || profile.work || [];
+    if (Array.isArray(rawWork) && rawWork.length > 0) {
+      newBlocks.push({
+        type: "work",
+        title: "Experience",
+        entries: rawWork.map((w) => {
+          const bullets = Array.isArray(w.bullets)
+            ? w.bullets
+            : Array.isArray(w.highlights)
+              ? w.highlights
+              : w.summary
+                ? w.summary.split("\n").filter(Boolean)
+                : [];
+          return {
+            company: w.company || "",
+            position: w.role || w.position || w.title || "",
+            startDate: w.startDate || "",
+            endDate: w.endDate || "",
+            highlights: bullets,
+            summary: bullets.join("\n"),
+          };
+        }),
+      });
+    }
+
+    // Education
+    const rawEdu = profile.education || [];
+    if (Array.isArray(rawEdu) && rawEdu.length > 0) {
+      newBlocks.push({
+        type: "education",
+        title: "Education",
+        entries: rawEdu.map((edu) => ({
+          institution: edu.institution || "",
+          studyType: edu.degree || edu.studyType || "",
+          area: edu.area || "",
+          startDate: edu.startDate || "",
+          endDate: edu.endDate || edu.graduationYear || "",
+          score: edu.score || edu.gpa || "",
+          summary: edu.summary || "",
+        })),
+      });
+    }
+
+    // Skills
+    let skillGroups = [];
+    if (profile.skills) {
+      if (Array.isArray(profile.skills)) {
+        if (profile.skills.every((s) => typeof s === "string")) {
+          skillGroups = [{ name: "Key Skills", keywords: profile.skills }];
+        } else {
+          skillGroups = profile.skills.map((s) => ({
+            name: s.name || "Technical Skills",
+            keywords: Array.isArray(s.keywords) ? s.keywords : Array.isArray(s.skills) ? s.skills : [],
+          }));
+        }
+      } else if (typeof profile.skills === "object") {
+        if (Array.isArray(profile.skills.technical) && profile.skills.technical.length > 0) {
+          skillGroups.push({ name: "Technical Skills", keywords: profile.skills.technical });
+        }
+        if (Array.isArray(profile.skills.soft) && profile.skills.soft.length > 0) {
+          skillGroups.push({ name: "Core Strengths", keywords: profile.skills.soft });
+        }
+        if (skillGroups.length === 0) {
+          const flat = Object.values(profile.skills).flat().filter(Boolean);
+          if (flat.length > 0) skillGroups.push({ name: "Key Skills", keywords: flat });
+        }
+      }
+    }
+
+    if (skillGroups.length > 0) {
+      newBlocks.push({
+        type: "skills",
+        title: "Skills",
+        groups: skillGroups,
+      });
+    }
+
+    // Projects
+    const rawProjects = profile.projects || [];
+    if (Array.isArray(rawProjects) && rawProjects.length > 0) {
+      newBlocks.push({
+        type: "projects",
+        title: "Projects",
+        entries: rawProjects.map((p) => ({
+          name: p.name || "",
+          description: p.description || "",
+          url: p.url || "",
+          technologies: Array.isArray(p.technologies) ? p.technologies : [],
+        })),
+      });
+    }
+
+    setBlocks(newBlocks);
+    setSaveStatus("unsaved");
+    setAiPatchNotification("📄 Successfully extracted and loaded resume!");
+    setTimeout(() => setAiPatchNotification(""), 4000);
+  }, []);
+
+  // Show choice modal for new resume sessions
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    if (!id && !resumeId && !hasPromptedNewModal) {
+      setHasPromptedNewModal(true);
+      setShowNewResumeModal(true);
+    }
+  }, [resumeId, hasPromptedNewModal]);
 
   const [atsData, setAtsData] = useState({
     score: null,
@@ -805,7 +1104,9 @@ export default function ResumeEditorPage() {
       if (!id) {
         if (templates.length > 0 && !resumeId) {
           applyTemplate(selectedTemplateId || templates[0]?._id);
-          setShowOnboarding(true); // Show onboarding for new resumes
+          if (user?.careerProfile) {
+            syncCareerProfile(user.careerProfile);
+          }
         }
         return;
       }
@@ -1886,10 +2187,17 @@ export default function ResumeEditorPage() {
   };
 
   // Apply patch from Conversational AI Assistant
-  const handleApplyAiPatch = (patch) => {
-    if (!patch) return;
-    const summaryText = patch.summary || (patch.field === "summary" ? patch.content : "");
-    if (summaryText) {
+  const handleApplyAiPatch = (rawPatch) => {
+    if (!rawPatch) return;
+    const patch = rawPatch.patch || rawPatch;
+
+    // 1. Summary
+    const summaryText =
+      patch.summary ||
+      patch.basics?.summary ||
+      (patch.field === "summary" ? (typeof patch.content === "string" ? patch.content : patch.summary) : "");
+
+    if (summaryText && typeof summaryText === "string") {
       setBlocks((prev) => {
         const idx = prev.findIndex((b) => b.type === "summary");
         if (idx === -1) {
@@ -1906,11 +2214,27 @@ export default function ResumeEditorPage() {
       setBasics((b) => ({ ...b, summary: summaryText }));
     }
 
+    // 2. Basics / Header Info
+    const basicsPatch = patch.basics || (patch.field === "basics" && typeof patch.content === "object" ? patch.content : null);
+    if (basicsPatch && typeof basicsPatch === "object") {
+      setBasics((prev) => ({
+        ...prev,
+        ...basicsPatch,
+        location: {
+          ...(prev.location || {}),
+          ...(typeof basicsPatch.location === "object" ? basicsPatch.location : { city: basicsPatch.location || prev.location?.city || "" }),
+        },
+      }));
+    }
+
+    // 3. Skills
     const skillsList = Array.isArray(patch.skills)
       ? patch.skills
       : Array.isArray(patch.keywords)
         ? patch.keywords
-        : null;
+        : patch.field === "skills"
+          ? (Array.isArray(patch.content) ? patch.content : Array.isArray(patch.keywords) ? patch.keywords : [patch.content].filter(Boolean))
+          : null;
 
     if (skillsList && skillsList.length > 0) {
       setBlocks((prev) => {
@@ -1943,16 +2267,49 @@ export default function ResumeEditorPage() {
       });
     }
 
-    const workList = Array.isArray(patch.work)
-      ? patch.work
-      : Array.isArray(patch.entries)
-        ? patch.entries
+    // 4. Work Experience
+    const rawWork =
+      patch.work ||
+      patch.entries ||
+      patch.experience ||
+      (patch.field === "work" ? (Array.isArray(patch.content) ? patch.content : patch.entries) : null);
+
+    const workList = Array.isArray(rawWork)
+      ? rawWork
+      : rawWork && typeof rawWork === "object"
+        ? [rawWork]
         : null;
 
     if (workList && workList.length > 0) {
       setBlocks((prev) => {
         const idx = prev.findIndex((b) => b.type === "work");
-        if (idx === -1) return prev;
+        if (idx === -1) {
+          return [
+            ...prev,
+            {
+              type: "work",
+              title: "Experience",
+              entries: workList.map((w) => {
+                const bullets =
+                  Array.isArray(w.highlights) && w.highlights.length > 0
+                    ? w.highlights
+                    : Array.isArray(w.description)
+                      ? w.description
+                      : w.summary
+                        ? w.summary.split("\n").filter(Boolean)
+                        : [];
+                return {
+                  company: w.company || "",
+                  position: w.position || w.title || "",
+                  startDate: w.startDate || "",
+                  endDate: w.endDate || "",
+                  highlights: bullets,
+                  summary: bullets.join("\n"),
+                };
+              }),
+            },
+          ];
+        }
         const next = [...prev];
         next[idx] = {
           ...next[idx],
@@ -1979,10 +2336,292 @@ export default function ResumeEditorPage() {
       });
     }
 
-    if (patch.basics) {
-      setBasics((prev) => ({ ...prev, ...patch.basics }));
+    // 5. Projects
+    const projectsList = Array.isArray(patch.projects)
+      ? patch.projects
+      : patch.field === "projects" && Array.isArray(patch.content)
+        ? patch.content
+        : null;
+
+    if (projectsList && projectsList.length > 0) {
+      setBlocks((prev) => {
+        const idx = prev.findIndex((b) => b.type === "projects");
+        if (idx === -1) {
+          return [
+            ...prev,
+            {
+              type: "projects",
+              title: "Projects",
+              entries: projectsList.map((p) => ({
+                name: p.name || p.title || "",
+                description: p.description || (Array.isArray(p.highlights) ? p.highlights.join("\n") : ""),
+                technologies: p.technologies || p.tech || [],
+                url: p.url || "",
+              })),
+            },
+          ];
+        }
+        const next = [...prev];
+        next[idx] = {
+          ...next[idx],
+          entries: projectsList.map((p) => ({
+            name: p.name || p.title || "",
+            description: p.description || (Array.isArray(p.highlights) ? p.highlights.join("\n") : ""),
+            technologies: p.technologies || p.tech || [],
+            url: p.url || "",
+          })),
+        };
+        return next;
+      });
     }
+
     setSaveStatus("unsaved");
+    setAiPatchNotification("✅ Applied AI changes to your resume canvas!");
+    setTimeout(() => setAiPatchNotification(""), 3500);
+  };
+
+  // 1-Click Action Envelope Handler for AI Co-Pilot Proposals
+  const handleApplyActionEnvelope = (actionName, payload) => {
+    if (!payload) return;
+
+    switch (actionName) {
+      case "setContactInfo": {
+        const p = payload;
+        const newName = p.fullName || p.name || "";
+        const newLabel = p.targetTitle || p.role || p.title || p.label || "";
+        const city = typeof p.location === "object" ? p.location.city || "" : p.location || "";
+        const newProfiles = [
+          ...(p.linkedin ? [{ network: "LinkedIn", url: p.linkedin, username: p.linkedin.split("/").filter(Boolean).pop() || "" }] : []),
+          ...(p.github ? [{ network: "GitHub", url: p.github, username: p.github.split("/").filter(Boolean).pop() || "" }] : []),
+        ];
+
+        setBasics((prev) => ({
+          ...prev,
+          name: newName || prev.name || "",
+          email: p.email || prev.email || "",
+          phone: p.phone || prev.phone || "",
+          label: newLabel || prev.label || "",
+          url: p.website || p.url || prev.url || "",
+          location: {
+            ...(prev.location || {}),
+            city: city || prev.location?.city || "",
+          },
+          profiles: newProfiles.length > 0 ? newProfiles : prev.profiles || [],
+        }));
+
+        if (newLabel || newName) {
+          setResumeName(`${newName ? newName + " - " : ""}${newLabel || newName} Resume`);
+        }
+        setAiPatchNotification("✅ Applied contact info to resume!");
+        break;
+      }
+
+      case "updateSummary": {
+        const summaryText = typeof payload === "string" ? payload : payload.summary || payload.text || payload.bio || "";
+        if (summaryText) {
+          setBlocks((prev) => {
+            const idx = prev.findIndex((b) => b.type === "summary");
+            if (idx === -1) {
+              const headerIdx = prev.findIndex((b) => b.type === "header");
+              const insertIdx = headerIdx !== -1 ? headerIdx + 1 : 0;
+              const next = [...prev];
+              next.splice(insertIdx, 0, { type: "summary", title: "Summary", content: summaryText });
+              return next;
+            }
+            const next = [...prev];
+            next[idx] = { ...next[idx], content: summaryText };
+            return next;
+          });
+          setBasics((b) => ({ ...b, summary: summaryText }));
+          setAiPatchNotification("✅ Applied professional summary to resume!");
+        }
+        break;
+      }
+
+      case "addExperience": {
+        const exp = payload;
+        const bullets = Array.isArray(exp.bullets)
+          ? exp.bullets
+          : Array.isArray(exp.highlights)
+            ? exp.highlights
+            : exp.summary
+              ? exp.summary.split("\n").filter(Boolean)
+              : [];
+
+        const rawDates = exp.dates || exp.duration || "";
+        const dateParts = typeof rawDates === "string" ? rawDates.split(/[-–—]/) : [];
+        const start = exp.startDate || (dateParts[0] ? dateParts[0].trim() : "");
+        const end = exp.endDate || (dateParts[1] ? dateParts[1].trim() : (dateParts.length === 1 ? dateParts[0].trim() : ""));
+
+        const newEntry = {
+          company: exp.company || "",
+          position: exp.role || exp.position || exp.title || "",
+          startDate: start,
+          endDate: end,
+          highlights: bullets,
+          summary: bullets.join("\n"),
+        };
+
+        setBlocks((prev) => {
+          const idx = prev.findIndex((b) => b.type === "work");
+          if (idx === -1) {
+            return [
+              ...prev,
+              {
+                type: "work",
+                title: "Experience",
+                entries: [newEntry],
+              },
+            ];
+          }
+          const next = [...prev];
+          next[idx] = {
+            ...next[idx],
+            entries: [...(next[idx].entries || []), newEntry],
+          };
+          return next;
+        });
+        setAiPatchNotification(`✅ Added ${exp.role || exp.company || "experience"} to resume!`);
+        break;
+      }
+
+      case "updateSkills": {
+        let groupsToApply = [];
+        if (payload.technical || payload.tools || payload.soft) {
+          if (Array.isArray(payload.technical) && payload.technical.length > 0) {
+            groupsToApply.push({ name: "Technical Skills", keywords: payload.technical });
+          }
+          if (Array.isArray(payload.tools) && payload.tools.length > 0) {
+            groupsToApply.push({ name: "Tools & Frameworks", keywords: payload.tools });
+          }
+          if (Array.isArray(payload.soft) && payload.soft.length > 0) {
+            groupsToApply.push({ name: "Core Strengths", keywords: payload.soft });
+          }
+        } else if (Array.isArray(payload.categories)) {
+          groupsToApply = payload.categories.map((c) => ({
+            name: c.category || c.name || "Skills",
+            keywords: Array.isArray(c.skills) ? c.skills : Array.isArray(c.keywords) ? c.keywords : [],
+          }));
+        } else {
+          const raw = payload.skills || payload.keywords || payload;
+          const flat = Array.isArray(raw)
+            ? raw
+            : typeof raw === "string"
+              ? raw.split(",").map((s) => s.trim()).filter(Boolean)
+              : [];
+          if (flat.length > 0) {
+            groupsToApply.push({ name: "Key Skills", keywords: flat });
+          }
+        }
+
+        if (groupsToApply.length > 0) {
+          setBlocks((prev) => {
+            const idx = prev.findIndex((b) => b.type === "skills");
+            if (idx === -1) {
+              return [
+                ...prev,
+                {
+                  type: "skills",
+                  title: "Skills",
+                  groups: groupsToApply,
+                },
+              ];
+            }
+            const next = [...prev];
+            next[idx] = {
+              ...next[idx],
+              groups: groupsToApply,
+            };
+            return next;
+          });
+          setAiPatchNotification("✅ Updated skills on resume!");
+        }
+        break;
+      }
+
+      case "addProject": {
+        const proj = payload;
+        const newProj = {
+          name: proj.name || proj.title || "",
+          description: proj.description || (Array.isArray(proj.highlights) ? proj.highlights.join("\n") : ""),
+          technologies: Array.isArray(proj.technologies) ? proj.technologies : (proj.technologies ? [proj.technologies] : []),
+          url: proj.url || proj.link || "",
+          highlights: Array.isArray(proj.highlights) ? proj.highlights : (proj.description ? [proj.description] : []),
+        };
+        setBlocks((prev) => {
+          const idx = prev.findIndex((b) => b.type === "projects");
+          if (idx === -1) {
+            return [
+              ...prev,
+              {
+                type: "projects",
+                title: "Projects",
+                entries: [newProj],
+              },
+            ];
+          }
+          const next = [...prev];
+          next[idx] = {
+            ...next[idx],
+            entries: [...(next[idx].entries || []), newProj],
+          };
+          return next;
+        });
+        setAiPatchNotification(`✅ Added ${proj.name || "project"} to resume!`);
+        break;
+      }
+
+      case "addEducation": {
+        const edu = payload;
+        const newEdu = {
+          institution: edu.institution || edu.school || "",
+          studyType: edu.degree || edu.studyType || "",
+          area: edu.major || edu.area || "",
+          startDate: edu.startDate || "",
+          endDate: edu.endDate || edu.dates || "",
+          score: edu.score || edu.gpa || "",
+          summary: edu.summary || "",
+        };
+        setBlocks((prev) => {
+          const idx = prev.findIndex((b) => b.type === "education");
+          if (idx === -1) {
+            return [
+              ...prev,
+              {
+                type: "education",
+                title: "Education",
+                entries: [newEdu],
+              },
+            ];
+          }
+          const next = [...prev];
+          next[idx] = {
+            ...next[idx],
+            entries: [...(next[idx].entries || []), newEdu],
+          };
+          return next;
+        });
+        setAiPatchNotification(`✅ Added education to resume!`);
+        break;
+      }
+
+      case "generateResume": {
+        if (payload && typeof payload === "object" && (payload.work || payload.workExperience || payload.personal || payload.basics)) {
+          handleUploadParsedResume(payload);
+        } else if (payload?.template) {
+          applyTemplate(payload.template);
+        }
+        setAiPatchNotification("✅ Applied full resume generation to canvas!");
+        break;
+      }
+
+      default:
+        handleApplyAiPatch(payload);
+        break;
+    }
+
+    setSaveStatus("unsaved");
+    setTimeout(() => setAiPatchNotification(""), 3500);
   };
 
   return (
@@ -2003,10 +2642,21 @@ export default function ResumeEditorPage() {
           if (!showAtsDrawer && atsData.matchedKeywords.length === 0 && !atsLoading) {
             runAtsCheck();
           }
-          setShowAtsDrawer(!showAtsDrawer);
+          setShowAtsDrawer((prev) => {
+            const next = !prev;
+            if (next) setShowAiAssistant(false);
+            return next;
+          });
         }}
         showAiAssistant={showAiAssistant}
-        onToggleAiAssistant={() => setShowAiAssistant((prev) => !prev)}
+        onToggleAiAssistant={() => {
+          setShowAiAssistant((prev) => {
+            const next = !prev;
+            if (next) setShowAtsDrawer(false);
+            return next;
+          });
+        }}
+        onSyncCareerProfile={() => syncCareerProfile()}
         onBackToDashboard={() => navigate("/Dashboard")}
       />
 
@@ -2015,6 +2665,14 @@ export default function ResumeEditorPage() {
         <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-5 py-2.5 bg-gradient-to-r from-purple-700 via-indigo-700 to-purple-800 text-white font-medium text-xs rounded-full shadow-2xl border border-purple-400/40 animate-pulse backdrop-blur-md">
           <span className="inline-block w-2.5 h-2.5 rounded-full bg-purple-300 animate-ping" />
           <span>{aiLoadingSection?.label || "AI Copilot is generating and enriching your resume..."}</span>
+        </div>
+      )}
+
+      {/* Floating Toast when AI Patch is Applied */}
+      {aiPatchNotification && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-xs font-semibold rounded-xl shadow-2xl border border-emerald-400/40 animate-bounce">
+          <CheckCircle2 size={16} />
+          <span>{aiPatchNotification}</span>
         </div>
       )}
 
@@ -2070,25 +2728,55 @@ export default function ResumeEditorPage() {
             onClose={() => setShowAiAssistant(false)}
             resumeData={renderData}
             onApplyPatch={handleApplyAiPatch}
+            onApplyActionEnvelope={handleApplyActionEnvelope}
+          />
+        )}
+
+        {showAtsDrawer && (
+          <AtsCopilotDrawer
+            isOpen={showAtsDrawer}
+            onClose={() => setShowAtsDrawer(false)}
+            score={liveAts.score}
+            keywordScore={atsData.keywordScore ?? Math.round((liveAts.breakdown.skillsScore / 15) * 100)}
+            syntaxScore={atsData.syntaxScore ?? Math.round(((liveAts.breakdown.contactScore + liveAts.breakdown.sectionsScore) / 40) * 100)}
+            impactScore={atsData.impactScore ?? Math.round(((liveAts.breakdown.metricsScore + liveAts.breakdown.actionVerbsScore) / 45) * 100)}
+            matchedKeywords={atsData.matchedKeywords || []}
+            missingKeywords={atsData.missingKeywords || []}
+            goodParts={liveAts.goodParts || []}
+            badParts={liveAts.badParts || []}
+            onFixIssue={handleAtsFix}
+            fixingPartId={fixingPartId}
+            onAddKeyword={(kw) => alert(`Added keyword: ${kw}`)}
+            loading={atsLoading}
           />
         )}
       </div>
 
-      <AtsCopilotDrawer
-        isOpen={showAtsDrawer}
-        onClose={() => setShowAtsDrawer(false)}
-        score={liveAts.score}
-        keywordScore={atsData.keywordScore ?? Math.round((liveAts.breakdown.skillsScore / 15) * 100)}
-        syntaxScore={atsData.syntaxScore ?? Math.round(((liveAts.breakdown.contactScore + liveAts.breakdown.sectionsScore) / 40) * 100)}
-        impactScore={atsData.impactScore ?? Math.round(((liveAts.breakdown.metricsScore + liveAts.breakdown.actionVerbsScore) / 45) * 100)}
-        matchedKeywords={atsData.matchedKeywords || []}
-        missingKeywords={atsData.missingKeywords || []}
-        goodParts={liveAts.goodParts || []}
-        badParts={liveAts.badParts || []}
-        onFixIssue={handleAtsFix}
-        fixingPartId={fixingPartId}
-        onAddKeyword={(kw) => alert(`Added keyword: ${kw}`)}
-        loading={atsLoading}
+      <NewResumeModal
+        isOpen={showNewResumeModal}
+        onClose={() => setShowNewResumeModal(false)}
+        careerProfile={user?.careerProfile}
+        onSelectCareerProfile={() => {
+          if (user?.careerProfile) {
+            syncCareerProfile(user.careerProfile);
+          } else {
+            setAiPatchNotification("⚠️ No CareerOps profile set yet. Go to Settings > CareerOps!");
+            setTimeout(() => setAiPatchNotification(""), 4000);
+          }
+          setShowNewResumeModal(false);
+        }}
+        onUploadParsed={(parsed) => {
+          handleUploadParsedResume(parsed);
+          setShowNewResumeModal(false);
+        }}
+        onStartAiCopilot={() => {
+          setShowNewResumeModal(false);
+          setShowAiAssistant(true);
+        }}
+        onStartBlank={() => {
+          applyTemplate(selectedTemplateId || "ats-classic");
+          setShowNewResumeModal(false);
+        }}
       />
 
       <OnboardingModal

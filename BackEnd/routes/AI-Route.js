@@ -2,6 +2,17 @@
 
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
+let pdfParse = null;
+try {
+  pdfParse = require("pdf-parse");
+} catch (e) {
+  console.warn("pdf-parse not loaded:", e.message);
+}
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
 const { generateJson } = require("../models/openrouter");
 const { authenticateToken, optionalAuthenticateToken } = require("./auth");
 const { calculateAtsScore } = require("../utils/atsScorer");
@@ -224,6 +235,66 @@ const fullResumeSchema = {
   required: ["resumeData"],
 };
 
+const careerBaselineSchema = {
+  type: "object",
+  properties: {
+    fullName: { type: "string", description: "Candidate's full name" },
+    targetRole: { type: "string", description: "Target role or professional title" },
+    seniority: {
+      type: "string",
+      description: "Career Seniority Level: Must strictly be one of: 'Entry / Associate (0-2 yrs)', 'Mid-Level (3-5 yrs)', 'Senior (5-8 yrs)', 'Staff / Principal (8+ yrs)', 'Director / Executive'",
+    },
+    bio: { type: "string", description: "2-3 sentence executive professional career bio" },
+    phone: { type: "string", description: "Direct contact phone number" },
+    location: { type: "string", description: "Location e.g. City, State or City, Country" },
+    linkedin: { type: "string", description: "LinkedIn profile URL or handle" },
+    github: { type: "string", description: "GitHub profile URL or handle" },
+    website: { type: "string", description: "Portfolio or personal website URL" },
+    skills: { type: "array", items: { type: "string" } },
+    experiences: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          company: { type: "string" },
+          position: { type: "string" },
+          startDate: { type: "string" },
+          endDate: { type: "string" },
+          highlights: { type: "array", items: { type: "string" } },
+        },
+        required: ["company", "position", "highlights"],
+      },
+    },
+    education: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          institution: { type: "string" },
+          degree: { type: "string" },
+          startDate: { type: "string" },
+          endDate: { type: "string" },
+        },
+        required: ["institution", "degree"],
+      },
+    },
+    projects: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          name: { type: "string", description: "Project title or app name" },
+          description: { type: "string", description: "Overview of what the project does and impact" },
+          technologies: { type: "array", items: { type: "string" }, description: "Tech stack used" },
+          url: { type: "string", description: "Link to live demo or GitHub repo" },
+        },
+        required: ["name"],
+      },
+    },
+  },
+  required: ["targetRole", "bio", "skills", "experiences"],
+};
+
 // Helpers
 
 function badRequest(res, message) {
@@ -415,6 +486,74 @@ const GROUNDING_DIRECTIVE = [
   "3. When enriching bullets with metrics or action verbs, keep them realistic and tied directly to the candidate's actual documented responsibilities. Do NOT introduce unrelated tech stacks or exaggerated corporate metrics out of thin air.",
   "4. When suggesting skills, only recommend tools, frameworks, and competencies directly relevant and closely adjacent to the candidate's documented career and projects. Never dump generic unrelated buzzwords.",
 ].join(" ");
+
+router.post("/upload-resume", optionalAuthenticateToken, upload.single("resumeFile"), async (req, res) => {
+  try {
+    let rawText = "";
+
+    if (req.file) {
+      const mime = req.file.mimetype || "";
+      const originalName = (req.file.originalname || "").toLowerCase();
+
+      if (mime === "application/pdf" || originalName.endsWith(".pdf")) {
+        if (pdfParse) {
+          const pdfData = await pdfParse(req.file.buffer);
+          rawText = pdfData.text || "";
+        } else {
+          return res.status(400).json({ message: "PDF parser is not configured." });
+        }
+      } else {
+        rawText = req.file.buffer.toString("utf-8");
+      }
+    } else if (req.body?.text) {
+      rawText = req.body.text;
+    } else {
+      return res.status(400).json({ message: "No resume file or text provided." });
+    }
+
+    if (!rawText || !rawText.trim()) {
+      return res.status(400).json({ message: "Could not extract any text from the provided document." });
+    }
+
+    const system = [
+      GROUNDING_DIRECTIVE,
+      "You are an expert AI Resume Scraper and ATS Data Architect.",
+      "Extract and structure the provided resume text into a clean, comprehensive resume profile JSON.",
+      "STRICT ANTI-HALLUCINATION: Only extract real facts and credentials present in the document. Do not invent fake companies, degrees, or unearned certifications.",
+      "Respond strictly as JSON matching schema: {",
+      '  "personal": { "fullName": "", "targetTitle": "", "email": "", "phone": "", "location": "", "linkedin": "", "website": "" },',
+      '  "summary": "",',
+      '  "skills": { "technical": [""], "soft": [""] },',
+      '  "workExperience": [ { "company": "", "role": "", "startDate": "", "endDate": "", "bullets": [""] } ],',
+      '  "education": [ { "institution": "", "degree": "", "graduationYear": "" } ]',
+      "}",
+    ].join(" ");
+
+    const customModels = ["google/gemini-2.5-flash", "meta-llama/llama-3.3-70b-instruct"];
+
+    const json = await generateJson({
+      system,
+      user: { rawResumeText: rawText.slice(0, 25000) },
+      models: customModels,
+    });
+
+    const userId = req.userId || req.user?.id;
+    if (userId) {
+      User.findByIdAndUpdate(userId, { $inc: { "usage.aiRewrites": 1 } }).catch(() => {});
+    }
+
+    return res.json({
+      success: true,
+      profile: json,
+      rawSnippet: rawText.slice(0, 1000),
+    });
+  } catch (err) {
+    console.error("Upload & scrape resume error:", err);
+    return res.status(500).json({
+      message: "Failed to parse and extract resume: " + (err.message || "Unknown error"),
+    });
+  }
+});
 
 router.post("/", optionalAuthenticateToken, async (req, res) => {
   const {
@@ -727,16 +866,58 @@ router.post("/", optionalAuthenticateToken, async (req, res) => {
     }
 
     if (scope === "chat-assistant") {
-      const { message: userMessage, history = [] } = req.body || {};
+      const { message: userMessage, history = [], draftState = null } = req.body || {};
+
+      const hasContact = draftState?.hasContact ?? !!(normalizedResume.basics?.name && (normalizedResume.basics?.email || normalizedResume.basics?.phone));
+      const hasSummary = draftState?.hasSummary ?? !!(normalizedResume.basics?.summary && normalizedResume.basics.summary.length > 20);
+      const experienceCount = draftState?.experienceCount ?? (Array.isArray(normalizedResume.work) ? normalizedResume.work.length : 0);
+      const hasEducation = draftState?.hasEducation ?? (Array.isArray(normalizedResume.education) && normalizedResume.education.length > 0);
+      const hasSkills = draftState?.hasSkills ?? (Array.isArray(normalizedResume.skills) && normalizedResume.skills.length > 0);
+
       const system = [
         GROUNDING_DIRECTIVE,
-        "You are Antigravity Career Copilot, an AI resume consultant and ATS specialist.",
-        "Help the user tailor, rewrite, improve, and optimize their resume.",
-        "Give actionable, direct advice based strictly on their actual resume data.",
-        "If the user asks to rewrite a summary, bullets, or add skills, provide both an explanation AND concrete proposed text grounded in their actual background.",
+        "You are an expert AI Resume Writer and Resume Builder Co-Pilot. Your goal is to help users construct a clean, high-impact, ATS-optimized resume.",
+        "--- SYSTEM CONSTRAINTS & BEHAVIOR ---",
+        "1. VALUE-FIRST RESUME ONBOARDING & AUTOMATIC FULL RESUME GENERATION",
+        "- If the user has NOT provided their information yet: Ask them if they have an existing resume, LinkedIn export, or rough notes to paste.",
+        "- AUTOMATIC FULL-PROFILE EXTRACTION (NO SECTION-BY-SECTION INTERROGATION):",
+        "  When the user provides or pastes their resume, CV, LinkedIn text, notes, or background information:",
+        "  DO NOT interrogate them section by section.",
+        "  DO NOT ask them one section at a time or make them confirm each part across multiple turns.",
+        "  IMMEDIATELY extract, structure, and generate the FULL resume with ALL sections at once!",
+        "  Emit <<act:generateResume {...}>> with the complete structured resume data so they can apply everything to their canvas in 1 single click:",
+        '  <<act:generateResume {"personal":{"fullName":"...","targetTitle":"...","email":"...","phone":"...","location":"...","linkedin":"...","website":"..."},"summary":"...","workExperience":[{"company":"...","role":"...","startDate":"...","endDate":"...","bullets":["..."]}],"education":[{"institution":"...","degree":"...","graduationYear":"..."}],"skills":{"technical":["..."],"tools":["..."],"soft":["..."]},"projects":[{"name":"...","description":"...","technologies":["..."],"url":"..."}]}>>',
+        "  In addition, emit individual section action envelopes (<<act:setContactInfo ...>>, <<act:updateSummary ...>>, <<act:addExperience ...>>, <<act:updateSkills ...>>) so the user can see visual preview cards for each section.",
+        "2. PROPOSE, DON'T IMPOSE (USER CONFIRMATION GATE)",
+        "- Emit action envelopes on a standalone line to present interactive preview cards in the UI:",
+        "  <<act:ACTION_NAME {\"key\": \"value\"}>>",
+        "--- AVAILABLE ACTION ENVELOPES ---",
+        "- `setContactInfo`: Proposes contact info & headliner title.",
+        '  Format: <<act:setContactInfo {"fullName":"Jane Doe","targetTitle":"Senior Fullstack Engineer","email":"jane@example.com","phone":"+1 555-0199","location":"San Francisco, CA","linkedin":"linkedin.com/in/janedoe","website":"janedoe.dev"}>>',
+        "- `updateSummary`: Proposes an executive summary/bio draft.",
+        '  Format: <<act:updateSummary {"summary":"Results-oriented Software Engineer with 7+ years of experience..."}>>',
+        "- `addExperience`: Proposes adding or revising a work experience entry.",
+        '  Format: <<act:addExperience {"company":"Tech Corp","role":"Senior Engineer","dates":"2021 - Present","bullets":["Led team of 5 engineers...","Improved system throughput by 35%..."]}>>',
+        "- `updateSkills`: Proposes grouped skills list.",
+        '  Format: <<act:updateSkills {"technical":["React","Node.js","Python"],"tools":["Git","Docker","Figma"],"soft":["Cross-functional Leadership"]}>>',
+        "- `generateResume`: Full resume generation containing all sections.",
+        '  Format: <<act:generateResume {"personal":{...},"summary":"...","workExperience":[...],"education":[...],"skills":{...},"projects":[...]}>>',
+        "--- WORK VS PROJECTS SEPARATION ---",
+        "- 'workExperience' MUST only contain genuine company/organization employment.",
+        "- Personal apps, open-source repositories, university projects, and side projects MUST be placed in 'projects'!",
+        "--- CURRENT RESUME DRAFT STATE ---",
+        `- Has Contact Info: ${hasContact ? "YES" : "NO"}`,
+        `- Has Summary: ${hasSummary ? "YES" : "NO"}`,
+        `- Experience Count: ${experienceCount}`,
+        `- Has Education: ${hasEducation ? "YES" : "NO"}`,
+        `- Has Skills: ${hasSkills ? "YES" : "NO"}`,
+        "--- WRITING STYLE ---",
+        "- Use strong action verbs (Architected, Spearheaded, Accelerated, Optimized) for bullet points.",
+        "- Quantify achievements with metrics and percentage gains wherever possible.",
+        "- When full data is provided, enthusiastically confirm that you have parsed their entire background and prepared 1-click proposals for all sections.",
         toneDirective,
-        'Respond strictly as JSON with "reply" (string in markdown) and optional "patch" (object with field and updated content if you generated replacement text).',
-      ].join(" ");
+        'Respond strictly as JSON with "reply" (string in markdown containing your conversational text and <<act:...>> tags on standalone lines) and optional "patch" (legacy object for backward compatibility).',
+      ].join("\n");
 
       const json = await generateJson({
         system,
@@ -752,6 +933,146 @@ router.post("/", optionalAuthenticateToken, async (req, res) => {
         reply: json?.reply || "Here are recommendations to elevate your resume.",
         patch: json?.patch || null,
       });
+    }
+
+    if (scope === "career-ops") {
+      const { action = "extract-baseline", rawText = "", careerProfile = {} } = req.body || {};
+
+      if (action === "extract-baseline") {
+        const system = [
+          GROUNDING_DIRECTIVE,
+          "You are an expert CareerOps technical recruiter and resume architect.",
+          "Analyze the provided raw text, rough career notes, or previous resume text.",
+          "Extract and structure a clean Master Career Baseline Profile.",
+          "Infer fullName, targetRole, and seniority from the text or experience duration.",
+          "Seniority MUST strictly be one of: 'Entry / Associate (0-2 yrs)', 'Mid-Level (3-5 yrs)', 'Senior (5-8 yrs)', 'Staff / Principal (8+ yrs)', 'Director / Executive'.",
+          "Extract contact details if found: phone, location (City, State/Country), linkedin URL/handle, github URL/handle, and personal website URL.",
+          "Formulate a strong 2–3 sentence executive career bio.",
+          "Extract clean skill keywords (8–15 items).",
+          "Structure work experiences with company, position, dates, and metric-driven bullet points.",
+          "CRITICAL SEPARATION OF WORK EXPERIENCE VS PROJECTS:",
+          "- 'experiences' MUST ONLY contain genuine employment, jobs, or contractor roles at companies or organizations.",
+          "- Personal projects, open-source repositories, portfolio apps, side projects, hackathons, and university projects MUST NEVER be classified as work experience! They MUST strictly be extracted into the 'projects' array (name, description, technologies, url).",
+          "Extract education entries.",
+          "Strict anti-hallucination rule: Only extract information that is explicitly stated or directly implied by the candidate's actual text. Do NOT invent new companies or degrees.",
+          'Respond strictly as JSON matching: { fullName, targetRole, seniority, bio, phone, location, linkedin, github, website, skills, experiences, education, projects }.',
+        ].join(" ");
+
+        const json = await generateJson({
+          system,
+          user: { rawText, currentProfile: careerProfile },
+          schema: careerBaselineSchema,
+          models: customModels,
+        });
+
+        if (userId) {
+          User.findByIdAndUpdate(userId, { $inc: { "usage.aiRewrites": 1 } }).catch(() => {});
+        }
+
+        // Normalize seniority to match the select dropdown exactly
+        let normalizedSeniority = json?.seniority || "Senior (5-8 yrs)";
+        const validOptions = [
+          "Entry / Associate (0-2 yrs)",
+          "Mid-Level (3-5 yrs)",
+          "Senior (5-8 yrs)",
+          "Staff / Principal (8+ yrs)",
+          "Director / Executive",
+        ];
+        const matched = validOptions.find((opt) =>
+          opt.toLowerCase().includes((json?.seniority || "").toLowerCase().slice(0, 4))
+        );
+        if (matched) normalizedSeniority = matched;
+
+        return res.json({
+          careerProfile: {
+            fullName: json?.fullName || "",
+            targetRole: json?.targetRole || "",
+            seniority: normalizedSeniority,
+            bio: json?.bio || "",
+            phone: json?.phone || "",
+            location: json?.location || "",
+            linkedin: json?.linkedin || "",
+            github: json?.github || "",
+            website: json?.website || "",
+            skills: Array.isArray(json?.skills) ? json.skills : [],
+            experiences: Array.isArray(json?.experiences) ? json.experiences : [],
+            education: Array.isArray(json?.education) ? json.education : [],
+            projects: Array.isArray(json?.projects) ? json.projects : [],
+          },
+        });
+      }
+
+      if (action === "polish-bio") {
+        const { targetRole, seniority, skills = [], experiences = [], currentBio = "" } = req.body || {};
+        const system = [
+          GROUNDING_DIRECTIVE,
+          "You are an executive resume writer.",
+          "Write a concise, commanding 2–3 sentence master career summary/bio based strictly on the candidate's actual target role, seniority, core skills, and work history.",
+          "Highlight concrete technical strengths and leadership competencies without fluff.",
+          toneDirective,
+          'Respond strictly as JSON with key "bio" (string).',
+        ].join(" ");
+
+        const json = await generateJson({
+          system,
+          user: { targetRole, seniority, skills, experiences, currentBio },
+          models: customModels,
+        });
+
+        if (userId) {
+          User.findByIdAndUpdate(userId, { $inc: { "usage.aiRewrites": 1 } }).catch(() => {});
+        }
+
+        return res.json({ bio: json?.bio || "" });
+      }
+
+      if (action === "enrich-experience") {
+        const { experience } = req.body || {};
+        const system = [
+          GROUNDING_DIRECTIVE,
+          "You are an ATS optimization specialist.",
+          "Enrich the candidate's work experience bullets for the specified role.",
+          "Transform weak or passive bullets into strong, quantified accomplishments using strong action verbs (e.g. Engineered, Spearheaded, Accelerated, Reduced).",
+          "Ensure every bullet stays strictly grounded in their stated role and company.",
+          toneDirective,
+          'Respond strictly as JSON with key "highlights" (array of 3–5 bullet strings).',
+        ].join(" ");
+
+        const json = await generateJson({
+          system,
+          user: { experience },
+          models: customModels,
+        });
+
+        if (userId) {
+          User.findByIdAndUpdate(userId, { $inc: { "usage.aiRewrites": 1 } }).catch(() => {});
+        }
+
+        return res.json({ highlights: Array.isArray(json?.highlights) ? json.highlights : [] });
+      }
+
+      if (action === "suggest-skills") {
+        const { targetRole, seniority, currentSkills = [], experiences = [] } = req.body || {};
+        const system = [
+          GROUNDING_DIRECTIVE,
+          "You are an ATS technical recruiter.",
+          "Suggest 10–14 high-demand, industry-standard technical tools, frameworks, languages, and methodologies that directly align with the candidate's target role and actual domain experience.",
+          "Avoid duplicate skills already present in their list.",
+          'Respond strictly as JSON with key "skills" (array of strings).',
+        ].join(" ");
+
+        const json = await generateJson({
+          system,
+          user: { targetRole, seniority, currentSkills, experiences },
+          models: customModels,
+        });
+
+        if (userId) {
+          User.findByIdAndUpdate(userId, { $inc: { "usage.aiRewrites": 1 } }).catch(() => {});
+        }
+
+        return res.json({ skills: Array.isArray(json?.skills) ? json.skills : [] });
+      }
     }
 
     return badRequest(res, `Unsupported scope: ${scope}`);

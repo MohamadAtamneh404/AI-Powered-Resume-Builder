@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Save, Download, Check, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, Save, Download, Check, Loader2, Sparkles, Briefcase } from "lucide-react";
 import Logo from "../../common/Logo";
 import ThemeToggle from "../../../Context/ThemeToggle";
 
@@ -33,6 +33,7 @@ const EditorTopBar = ({
   onToggleAiAssistant,
   showAiAssistant = false,
   onBackToDashboard,
+  onSyncCareerProfile,
 }) => {
 
   const [timeText, setTimeText] = useState(timeAgo(lastSavedAt));
@@ -118,6 +119,18 @@ const EditorTopBar = ({
             {atsScore}
           </span>
         </button>
+
+        {onSyncCareerProfile && (
+          <button
+            type="button"
+            onClick={onSyncCareerProfile}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors border border-blue-200 dark:border-blue-800/60 cursor-pointer"
+            title="Sync profile details from your Master Career Baseline (CareerOps)"
+          >
+            <Briefcase className="w-3.5 h-3.5 text-blue-500" />
+            <span className="hidden sm:inline">Career Profile</span>
+          </button>
+        )}
 
         <ThemeToggle />
 

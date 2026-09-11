@@ -324,7 +324,7 @@ export function AtsCopilotDrawer({
 
   if (loading) {
     return (
-      <div className="w-full lg:w-80 xl:w-96 h-[calc(100vh-56px)] overflow-y-auto border-l border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#141417] p-5 space-y-4 flex flex-col items-center justify-center flex-shrink-0 z-20 shadow-xl transition-colors">
+      <div className="w-80 sm:w-96 h-full flex flex-col items-center justify-center border-l border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#141417] p-5 space-y-4 shrink-0 z-20 shadow-xl transition-colors">
         <span className="w-7 h-7 border-2 border-black/20 dark:border-white/20 border-t-emerald-500 rounded-full animate-spin"></span>
         <span className="text-sm font-semibold text-gray-700 dark:text-zinc-300">
           Running Deep ATS Audit...
@@ -358,9 +358,9 @@ export function AtsCopilotDrawer({
         : "At Risk of Filter Rejection";
 
   return (
-    <div className="w-full lg:w-80 xl:w-96 h-[calc(100vh-56px)] overflow-y-auto border-l border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#141417] p-4 space-y-4 text-left flex-shrink-0 z-20 shadow-xl transition-colors custom-scrollbar">
+    <div className="w-80 sm:w-96 h-full flex flex-col border-l border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#141417] text-left shrink-0 z-20 shadow-xl transition-colors">
       {/* Drawer Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
+      <div className="flex items-center justify-between p-4 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
           <h3 className="text-sm font-bold text-[#1a1a1a] dark:text-zinc-100 tracking-tight">
@@ -377,6 +377,8 @@ export function AtsCopilotDrawer({
           </button>
         )}
       </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
 
       {/* Overall Score Dial Card */}
       <div className="p-4 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 text-white border border-white/10 text-center shadow-lg relative overflow-hidden">
@@ -598,8 +600,172 @@ export function AtsCopilotDrawer({
           </div>
         </div>
       )}
+      </div>
     </div>
   );
+}
+
+function parseActionEnvelopes(rawContent) {
+  if (!rawContent) return { cleanText: "", actions: [] };
+  const actionRegex = /<<act:([a-zA-Z0-9_-]+)\s+([\s\S]*?)>>/g;
+  const actions = [];
+  let match;
+  while ((match = actionRegex.exec(rawContent)) !== null) {
+    const actionName = match[1];
+    let payload = null;
+    try {
+      payload = JSON.parse(match[2].trim());
+    } catch {
+      payload = match[2].trim();
+    }
+    actions.push({
+      actionName,
+      payload,
+      raw: match[0],
+    });
+  }
+  const cleanText = rawContent.replace(actionRegex, "").trim();
+  return { cleanText, actions };
+}
+
+function getActionTitle(actionName) {
+  switch (actionName) {
+    case "setContactInfo":
+      return "Contact & Target Title";
+    case "updateSummary":
+      return "Executive Professional Summary";
+    case "addExperience":
+      return "Work Experience Role & Bullets";
+    case "updateSkills":
+      return "Technical & Soft Skills";
+    case "addProject":
+      return "Key Project & Portfolio";
+    case "addEducation":
+      return "Education & Credentials";
+    case "generateResume":
+      return "Full ATS Resume Compilation";
+    default:
+      return actionName;
+  }
+}
+
+function renderActionPreview(actionName, payload) {
+  if (!payload || typeof payload !== "object") {
+    return <div>{String(payload)}</div>;
+  }
+  switch (actionName) {
+    case "setContactInfo":
+      return (
+        <div>
+          <div className="font-bold text-zinc-900 dark:text-zinc-100">
+            {payload.fullName || "Candidate"} {payload.targetTitle ? `• ${payload.targetTitle}` : ""}
+          </div>
+          <div className="text-zinc-500 dark:text-zinc-400 text-[10px] mt-0.5">
+            {[payload.email, payload.phone, payload.location].filter(Boolean).join(" | ")}
+          </div>
+          {(payload.linkedin || payload.website) && (
+            <div className="text-zinc-400 dark:text-zinc-500 text-[10px] mt-0.5 truncate">
+              {[payload.linkedin, payload.website].filter(Boolean).join(" • ")}
+            </div>
+          )}
+        </div>
+      );
+    case "updateSummary":
+      return (
+        <div className="italic leading-relaxed">
+          "{payload.summary}"
+        </div>
+      );
+    case "addExperience":
+      return (
+        <div>
+          <div className="font-bold text-zinc-900 dark:text-zinc-100">
+            {payload.role || payload.position} {payload.company ? `at ${payload.company}` : ""}
+            {payload.dates ? <span className="text-zinc-400 font-normal ml-1">({payload.dates})</span> : ""}
+          </div>
+          {Array.isArray(payload.bullets) && payload.bullets.length > 0 && (
+            <ul className="list-disc list-inside mt-1 space-y-0.5 text-zinc-600 dark:text-zinc-300 text-[10px]">
+              {payload.bullets.slice(0, 3).map((b, i) => (
+                <li key={i}>{b}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      );
+    case "updateSkills":
+      return (
+        <div className="space-y-1">
+          {Array.isArray(payload.technical) && payload.technical.length > 0 && (
+            <div>
+              <span className="font-semibold text-zinc-800 dark:text-zinc-200">Tech: </span>
+              <span>{payload.technical.join(", ")}</span>
+            </div>
+          )}
+          {Array.isArray(payload.tools) && payload.tools.length > 0 && (
+            <div>
+              <span className="font-semibold text-zinc-800 dark:text-zinc-200">Tools: </span>
+              <span>{payload.tools.join(", ")}</span>
+            </div>
+          )}
+          {Array.isArray(payload.soft) && payload.soft.length > 0 && (
+            <div>
+              <span className="font-semibold text-zinc-800 dark:text-zinc-200">Soft Skills: </span>
+              <span>{payload.soft.join(", ")}</span>
+            </div>
+          )}
+        </div>
+      );
+    case "addProject":
+      return (
+        <div>
+          <div className="font-bold text-zinc-900 dark:text-zinc-100">
+            {payload.name || payload.title || "Project"}
+            {payload.technologies ? (
+              <span className="text-zinc-400 font-normal ml-1">
+                ({Array.isArray(payload.technologies) ? payload.technologies.join(", ") : payload.technologies})
+              </span>
+            ) : null}
+          </div>
+          {payload.description && (
+            <div className="text-zinc-600 dark:text-zinc-300 text-[10px] mt-0.5 leading-snug">
+              {payload.description}
+            </div>
+          )}
+          {payload.url && (
+            <div className="text-purple-600 dark:text-purple-400 text-[10px] mt-0.5 truncate">
+              {payload.url}
+            </div>
+          )}
+        </div>
+      );
+    case "addEducation":
+      return (
+        <div>
+          <div className="font-bold text-zinc-900 dark:text-zinc-100">
+            {payload.degree || payload.studyType || "Degree"} {payload.institution ? `at ${payload.institution}` : ""}
+          </div>
+          <div className="text-zinc-500 dark:text-zinc-400 text-[10px]">
+            {[payload.area, payload.startDate, payload.endDate || payload.dates].filter(Boolean).join(" • ")}
+          </div>
+        </div>
+      );
+    case "generateResume":
+      return (
+        <div className="space-y-1">
+          <div className="font-bold text-zinc-900 dark:text-zinc-100">
+            ⚡ Full Complete Resume Blueprint
+          </div>
+          <div className="text-zinc-600 dark:text-zinc-300 text-[10px] space-y-0.5">
+            {payload.personal?.fullName && <div>• <strong>Candidate:</strong> {payload.personal.fullName} ({payload.personal.targetTitle || "Engineer"})</div>}
+            {Array.isArray(payload.workExperience) && <div>• <strong>Experience:</strong> {payload.workExperience.length} roles ready</div>}
+            {Array.isArray(payload.projects) && <div>• <strong>Projects:</strong> {payload.projects.length} key projects ready</div>}
+            {Array.isArray(payload.education) && <div>• <strong>Education:</strong> {payload.education.length} credentials ready</div>}
+          </div>
+        </div>
+      );
+    default:
+      return <pre className="text-[10px]">{JSON.stringify(payload, null, 2)}</pre>;
+  }
 }
 
 export function AiAssistantDrawer({
@@ -607,15 +773,18 @@ export function AiAssistantDrawer({
   onClose,
   resumeData = null,
   onApplyPatch,
+  onApplyActionEnvelope,
   onSectionGenerate,
 }) {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
       content:
-        "👋 **Hi! I am your AI Resume Copilot.**\n\nI can help you tailor your resume for specific roles, rewrite bullets with quantifiable metrics, add high-demand ATS keywords, or review any section.\n\nChoose a quick suggestion below or ask anything!",
+        "👋 **Hi! I am your AI Resume Copilot.**\n\nI can help you build an ATS-optimized resume from scratch or refine your current draft.\n\nDo you have an existing resume or LinkedIn summary to paste, or would you like to build it step-by-step starting with your contact info?",
     },
   ]);
+  const [appliedIndices, setAppliedIndices] = useState(new Set());
+  const [appliedActionKeys, setAppliedActionKeys] = useState(new Set());
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -650,12 +819,26 @@ export function AiAssistantDrawer({
     setLoading(true);
 
     try {
+      // Calculate current resume draft state
+      const hasContact = !!(resumeData?.basics?.name && (resumeData?.basics?.email || resumeData?.basics?.phone));
+      const hasSummary = !!(resumeData?.basics?.summary && resumeData.basics.summary.length > 20);
+      const experienceCount = Array.isArray(resumeData?.work) ? resumeData.work.length : 0;
+      const hasEducation = Array.isArray(resumeData?.education) && resumeData.education.length > 0;
+      const hasSkills = Array.isArray(resumeData?.skills) && resumeData.skills.length > 0;
+
       // Call backend AI route with scope 'chat-assistant'
       const { data } = await api.post("/ai", {
         scope: "chat-assistant",
         message: text,
         history: nextHistory.slice(-6),
         resumeData,
+        draftState: {
+          hasContact,
+          hasSummary,
+          experienceCount,
+          hasEducation,
+          hasSkills,
+        },
       });
 
       setMessages((prev) => [
@@ -682,7 +865,7 @@ export function AiAssistantDrawer({
   };
 
   return (
-    <div className="w-full lg:w-84 xl:w-96 h-[calc(100vh-56px)] flex flex-col border-l border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#141417] text-left flex-shrink-0 z-20 shadow-xl transition-colors">
+    <div className="w-80 sm:w-96 h-full flex flex-col border-l border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#141417] text-left shrink-0 z-20 shadow-xl transition-colors">
       {/* Header */}
       <div className="p-4 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between shrink-0 bg-white dark:bg-[#141417]">
         <div className="flex items-center gap-2">
@@ -714,6 +897,10 @@ export function AiAssistantDrawer({
       <div className="flex-1 overflow-y-auto p-4 space-y-3.5 custom-scrollbar text-xs">
         {messages.map((msg, idx) => {
           const isUser = msg.role === "user";
+          const { cleanText, actions } = !isUser
+            ? parseActionEnvelopes(msg.content)
+            : { cleanText: msg.content, actions: [] };
+
           return (
             <div
               key={idx}
@@ -732,22 +919,121 @@ export function AiAssistantDrawer({
                 }`}
               >
                 <div className="whitespace-pre-line prose prose-xs dark:prose-invert">
-                  {msg.content}
+                  {cleanText}
                 </div>
 
-                {/* Optional Patch Apply Button */}
+                {/* 1-Click Apply All Action Cards Banner */}
+                {actions.length > 1 && (
+                  <div className="mt-3 p-3 rounded-xl bg-gradient-to-r from-purple-600/15 via-indigo-600/15 to-purple-600/15 border border-purple-500/40 flex items-center justify-between gap-3 shadow-xs">
+                    <div>
+                      <div className="text-xs font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
+                        <Sparkles size={13} />
+                        <span>{actions.length} Sections Ready</span>
+                      </div>
+                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        Apply all extracted sections to your resume at once
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        actions.forEach((act, aIdx) => {
+                          onApplyActionEnvelope?.(act.actionName, act.payload);
+                          setAppliedActionKeys((prev) => new Set(prev).add(`${idx}-${aIdx}`));
+                        });
+                      }}
+                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white shadow transition flex items-center gap-1.5 cursor-pointer shrink-0"
+                    >
+                      <Wand2 size={12} />
+                      <span>Apply All</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Render Interactive Action Envelope Proposal Cards */}
+                {actions.map((act, aIdx) => {
+                  const actionKey = `${idx}-${aIdx}`;
+                  const isActionApplied = appliedActionKeys.has(actionKey);
+                  return (
+                    <div
+                      key={aIdx}
+                      className="mt-3 p-3 rounded-xl bg-purple-500/10 dark:bg-purple-950/40 border border-purple-500/30 text-left space-y-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
+                          <Sparkles size={12} />
+                          <span>{getActionTitle(act.actionName)}</span>
+                        </span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-600 dark:text-purple-300">
+                          Interactive Card
+                        </span>
+                      </div>
+
+                      <div className="text-[11px] text-zinc-700 dark:text-zinc-300 bg-white/80 dark:bg-zinc-900/80 p-2.5 rounded-lg border border-black/5 dark:border-white/5">
+                        {renderActionPreview(act.actionName, act.payload)}
+                      </div>
+
+                      <div className="flex justify-end pt-1">
+                        <button
+                          type="button"
+                          disabled={isActionApplied}
+                          onClick={() => {
+                            onApplyActionEnvelope?.(act.actionName, act.payload);
+                            setAppliedActionKeys((prev) => new Set(prev).add(actionKey));
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                            isActionApplied
+                              ? "bg-emerald-600 text-white cursor-default"
+                              : "bg-purple-600 hover:bg-purple-700 text-white shadow-sm cursor-pointer"
+                          }`}
+                        >
+                          {isActionApplied ? (
+                            <>
+                              <CheckCircle2 size={12} />
+                              <span>✓ Applied to Resume</span>
+                            </>
+                          ) : (
+                            <>
+                              <Wand2 size={12} />
+                              <span>Apply to Resume</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Optional Legacy Patch Apply Button */}
                 {msg.patch && onApplyPatch && (
-                  <div className="mt-3 pt-2.5 border-t border-black/[0.08] dark:border-white/[0.08] flex items-center justify-between">
+                  <div className="mt-3 pt-2.5 border-t border-black/[0.08] dark:border-white/[0.08] flex items-center justify-between gap-2">
                     <span className="text-[11px] font-semibold text-purple-600 dark:text-purple-400">
-                      Ready to apply to canvas:
+                      {appliedIndices.has(idx) ? "Patch applied to resume!" : "Ready to apply to canvas:"}
                     </span>
                     <button
                       type="button"
-                      onClick={() => onApplyPatch(msg.patch)}
-                      className="px-2.5 py-1 rounded-md bg-purple-600 hover:bg-purple-500 text-white font-semibold text-[11px] shadow transition flex items-center gap-1"
+                      onClick={() => {
+                        onApplyPatch(msg.patch);
+                        setAppliedIndices((prev) => new Set(prev).add(idx));
+                      }}
+                      disabled={appliedIndices.has(idx)}
+                      className={`px-2.5 py-1 rounded-md text-white font-semibold text-[11px] shadow transition flex items-center gap-1 shrink-0 ${
+                        appliedIndices.has(idx)
+                          ? "bg-emerald-600 cursor-default"
+                          : "bg-purple-600 hover:bg-purple-500 cursor-pointer"
+                      }`}
                     >
-                      <Wand2 size={11} />
-                      <span>Apply Changes</span>
+                      {appliedIndices.has(idx) ? (
+                        <>
+                          <CheckCircle2 size={11} />
+                          <span>Applied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Wand2 size={11} />
+                          <span>Apply Changes</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 )}

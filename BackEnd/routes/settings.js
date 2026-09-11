@@ -310,4 +310,136 @@ router.post("/subscription", authenticateToken, async (req, res) => {
   }
 });
 
+// GET Master Career Baseline Profile (CareerOps)
+router.get("/career-profile", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user?.id || req.userId;
+    const user = await User.findById(userId).select("fullName email photo careerProfile");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const careerProfile = user.careerProfile || {
+      targetRole: "",
+      seniority: "",
+      bio: "",
+      phone: "",
+      location: "",
+      linkedin: "",
+      github: "",
+      website: "",
+      skills: [],
+      experiences: [],
+      education: [],
+    };
+
+    res.json({
+      fullName: user.fullName,
+      email: user.email,
+      photo: user.photo,
+      careerProfile,
+    });
+  } catch (err) {
+    console.error("GET /career-profile error:", err);
+    res.status(500).json({ message: "Failed to load career profile." });
+  }
+});
+
+// PUT Update Master Career Baseline Profile (CareerOps)
+router.put("/career-profile", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user?.id || req.userId;
+    const {
+      targetRole,
+      seniority,
+      bio,
+      phone,
+      location,
+      linkedin,
+      github,
+      website,
+      skills,
+      experiences,
+      education,
+      projects,
+      fullName,
+    } = req.body || {};
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (fullName && typeof fullName === "string") {
+      user.fullName = fullName.trim();
+    }
+
+    if (!user.careerProfile) {
+      user.careerProfile = {};
+    }
+
+    if (targetRole !== undefined) user.careerProfile.targetRole = String(targetRole || "").trim();
+    if (seniority !== undefined) user.careerProfile.seniority = String(seniority || "").trim();
+    if (bio !== undefined) user.careerProfile.bio = String(bio || "").trim();
+    if (phone !== undefined) user.careerProfile.phone = String(phone || "").trim();
+    if (location !== undefined) user.careerProfile.location = String(location || "").trim();
+    if (linkedin !== undefined) user.careerProfile.linkedin = String(linkedin || "").trim();
+    if (github !== undefined) user.careerProfile.github = String(github || "").trim();
+    if (website !== undefined) user.careerProfile.website = String(website || "").trim();
+
+    if (Array.isArray(skills)) {
+      user.careerProfile.skills = skills.map((s) => String(s || "").trim()).filter(Boolean);
+    }
+
+    if (Array.isArray(experiences)) {
+      user.careerProfile.experiences = experiences.map((exp) => ({
+        company: String(exp.company || "").trim(),
+        position: String(exp.position || exp.title || "").trim(),
+        startDate: String(exp.startDate || "").trim(),
+        endDate: String(exp.endDate || "").trim(),
+        highlights: Array.isArray(exp.highlights)
+          ? exp.highlights.map((h) => String(h || "").trim()).filter(Boolean)
+          : exp.description
+            ? [String(exp.description)]
+            : [],
+      }));
+    }
+
+    if (Array.isArray(education)) {
+      user.careerProfile.education = education.map((edu) => ({
+        institution: String(edu.institution || "").trim(),
+        degree: String(edu.degree || "").trim(),
+        startDate: String(edu.startDate || "").trim(),
+        endDate: String(edu.endDate || "").trim(),
+      }));
+    }
+
+    if (Array.isArray(projects)) {
+      user.careerProfile.projects = projects.map((p) => ({
+        name: String(p.name || "").trim(),
+        description: String(p.description || "").trim(),
+        technologies: Array.isArray(p.technologies)
+          ? p.technologies.map((t) => String(t || "").trim()).filter(Boolean)
+          : [],
+        url: String(p.url || "").trim(),
+      }));
+    }
+
+    user.markModified("careerProfile");
+    await user.save();
+
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    res.json({
+      message: "Master Career Baseline Profile saved successfully!",
+      careerProfile: user.careerProfile,
+      user: userObj,
+    });
+  } catch (err) {
+    console.error("PUT /career-profile error:", err);
+    res.status(500).json({ message: "Failed to update career profile." });
+  }
+});
+
 module.exports = router;

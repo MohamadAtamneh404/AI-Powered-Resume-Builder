@@ -11,11 +11,12 @@ const analyticsRoutes = require("./analytics.js");
 const router = express.Router();
 
 router.use("/users", authRoutes);
+router.use("/user", settingsRoutes);
+router.use("/settings", settingsRoutes);
 router.use("/resumes", resumeRoutes);
 router.use("/templates", templateRoutes);
 router.use("/jobs", jobApplicationRoutes);
 router.use("/ai", aiRoutes);
-router.use("/settings", settingsRoutes);
 router.use("/tailor", tailorRoutes);
 router.use("/analytics", analyticsRoutes);
 

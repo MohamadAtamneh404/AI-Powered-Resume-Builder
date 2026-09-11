@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import api from "../../services/api";
 
 const ENTRY_PATHWAYS = [
   {
@@ -87,7 +88,16 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }) {
     }
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    try {
+      await api.put("/user/career-profile", {
+        targetRole: roleTitle,
+        seniority,
+        skills: extractedKeywords,
+      });
+    } catch (e) {
+      console.warn("Failed to persist career baseline to database:", e);
+    }
     onComplete?.({
       pathway: selectedPathway,
       roleTitle,
@@ -105,7 +115,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }) {
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
             <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-              Screen 4 • Career Baseline Onboarding
+              Career Baseline Setup (CareerOps)
             </span>
           </div>
           <button
