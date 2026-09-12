@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=220&section=header&text=AI%20Resume%20Builder&fontSize=65&fontAlignY=38&desc=Intelligent%20ATS-Optimized%20Resume%20Platform%20%26%20CareerOps%20Studio&descAlignY=60&descAlign=50" alt="AI Resume Builder Header" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&amp;color=gradient&amp;height=220&amp;section=header&amp;text=AI%20Resume%20Builder&amp;fontSize=65&amp;fontAlignY=38&amp;desc=Intelligent%20ATS-Optimized%20Resume%20Platform%20%26%20CareerOps%20Studio&amp;descAlignY=60&amp;descAlign=50" alt="AI Resume Builder Header" />
 </div>
 
 <p align="center">
