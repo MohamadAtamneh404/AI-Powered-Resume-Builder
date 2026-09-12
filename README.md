@@ -1,7 +1,31 @@
 <div align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=220&section=header&text=AI%20Resume%20Builder&fontSize=65&fontAlignY=38&desc=Intelligent%20ATS-Optimized%20Resume%20Platform&descAlignY=60&descAlign=50" />
 </div>
+<div align="center">
 
+  <!-- Optional: Add a banner image or logo -->
+  <img src="assets/banner.png" alt="Project Banner" width="100%">
+
+  # 🚀 Project Title Here
+  
+  **Your catchy one-sentence tagline or description goes here.**
+
+  <!-- Quick Links / Badges -->
+  <p>
+    <a href="#-visual--screenshots"><strong>Explore Screenshots</strong></a> ·
+    <a href="https://github.com/your-username/your-repo/issues">Report Bug</a> ·
+    <a href="https://github.com/your-username/your-repo/pulls">Request Feature</a>
+  </p>
+
+  <!-- Status / Tech Badges -->
+  <p>
+    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
+    <img src="https://img.shields.io/badge/Status-Active-success.svg" alt="Status">
+  </p>
+
+</div>
+
+---
 <p align="center">
   <img src="https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React 19" />
   <img src="https://img.shields.io/badge/Vite_7-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite 7" />
@@ -21,12 +45,12 @@
 
 | WYSIWYG Resume Canvas & Design Controls | AI Co-Pilot & 1-Click Action Proposals |
 |:---:|:---:|
-| *<img width="1916" height="877" alt="Screenshot 2026-09-12 172926" src="https://github.com/user-attachments/assets/584e673b-1146-4dbc-9376-30fb6e95cdbd" />* | *<img width="1917" height="872" alt="Screenshot 2026-09-12 172651" src="https://github.com/user-attachments/assets/215520d1-4d9d-4390-9ac7-c1b9581bfdb9" />![Uploading Screenshot 2026-09-12 172926.png…]()
+| *<img width="1916" height="877" alt="Screenshot 2026-09-12 172926" src="https://github.com/user-attachments/assets/584e673b-1146-4dbc-9376-30fb6e95cdbd" />* | *<img width="1917" height="872" alt="Screenshot 2026-09-12 172651" src="https://github.com/user-attachments/assets/215520d1-4d9d-4390-9ac7-c1b9581bfdb9" />!
 * |
 
 | Real-Time ATS Audit & 1-Click AI Fixes | Master CareerOps Baseline Profile |
 |:---:|:---:|
-| *(4-dimension scoring & automated deficiency repair)* | *(Centralized work history & portfolio project tracker)* |
+| *<img width="1538" height="742" alt="Screenshot 2026-09-12 173048" src="https://github.com/user-attachments/assets/df1e348d-2c2b-4f88-8fdb-95c90ffd1af4" />* | *<img width="1910" height="862" alt="Screenshot 2026-09-12 173153" src="https://github.com/user-attachments/assets/7425d3f0-5b4b-4a6f-9732-39767fd42d3d" />* |
 
 ---
 
