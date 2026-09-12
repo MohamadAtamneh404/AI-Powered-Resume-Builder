@@ -35,7 +35,7 @@ The platform is structured with a decoupled client-server model, containerized v
 
 ```mermaid
 graph TD
-    User([Job Seeker]) --> |Builds & Refines| Frontend[React 19 / Vite 7 Client]
+    User([Job Seeker]) -->|Builds & Refines| Frontend[React 19 / Vite 7 Client]
 
     subgraph "Frontend Layer (React 19, Tailwind CSS v4, Framer Motion)"
         Frontend --> WYSIWYG[Modular WYSIWYG Canvas]
@@ -45,7 +45,7 @@ graph TD
         Frontend --> JobTrackerUI[Job Application Tracker]
     end
 
-    Frontend <==> |REST API /api/* (Vite Proxy)| Backend[Node.js / Express 5 API Gateway]
+    Frontend <== "REST API /api/* (Vite Proxy)" ==> Backend[Node.js / Express 5 API Gateway]
 
     subgraph "Backend Services"
         Backend --> AuthModule[Firebase Admin Auth & Auto-Provisioning]
