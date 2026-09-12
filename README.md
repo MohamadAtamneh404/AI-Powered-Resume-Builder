@@ -1,4 +1,4 @@
-<div align="center">
+<img width="1917" height="877" alt="Screenshot 2026-09-12 175440" src="https://github.com/user-attachments/assets/e366dbff-e220-4f03-939f-67711fbadb7f" /><div align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=220&section=header&text=AI%20Resume%20Builder&fontSize=65&fontAlignY=38&desc=Intelligent%20ATS-Optimized%20Resume%20Platform%20%26%20CareerOps%20Studio&descAlignY=60&descAlign=50" alt="AI Resume Builder Header" />
 </div>
 
@@ -21,7 +21,7 @@
 
 ## 🖼️ Hero Section
 
-![AI-Powered Resume Builder Interface](docs/images/hero-section.png)
+![AI-Powered Resume Builder Interface](<img width="1917" height="877" alt="Screenshot 2026-09-12 175440" src="https://github.com/user-attachments/assets/44ecb6f9-9d95-483d-b34c-a77e9bdfe02b" />)
 
 ---
 
