@@ -1,30 +1,6 @@
 <div align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=220&section=header&text=AI%20Resume%20Builder&fontSize=65&fontAlignY=38&desc=Intelligent%20ATS-Optimized%20Resume%20Platform&descAlignY=60&descAlign=50" />
 </div>
-<div align="center">
-
-  <!-- Optional: Add a banner image or logo -->
-  <img src="assets/banner.png" alt="Project Banner" width="100%">
-
-  # 🚀 Project Title Here
-  
-  **Your catchy one-sentence tagline or description goes here.**
-
-  <!-- Quick Links / Badges -->
-  <p>
-    <a href="#-visual--screenshots"><strong>Explore Screenshots</strong></a> ·
-    <a href="https://github.com/your-username/your-repo/issues">Report Bug</a> ·
-    <a href="https://github.com/your-username/your-repo/pulls">Request Feature</a>
-  </p>
-
-  <!-- Status / Tech Badges -->
-  <p>
-    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
-    <img src="https://img.shields.io/badge/Status-Active-success.svg" alt="Status">
-  </p>
-
-</div>
-
 ---
 <p align="center">
   <img src="https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React 19" />
