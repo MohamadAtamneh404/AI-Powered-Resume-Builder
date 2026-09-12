@@ -21,7 +21,8 @@
 
 | WYSIWYG Resume Canvas & Design Controls | AI Co-Pilot & 1-Click Action Proposals |
 |:---:|:---:|
-| *(Live visual reordering, ATS presets, typography & themes)* | *(Automatic full-resume extraction & 1-click apply)* |
+| *<img width="1916" height="877" alt="Screenshot 2026-09-12 172926" src="https://github.com/user-attachments/assets/584e673b-1146-4dbc-9376-30fb6e95cdbd" />* | *<img width="1917" height="872" alt="Screenshot 2026-09-12 172651" src="https://github.com/user-attachments/assets/215520d1-4d9d-4390-9ac7-c1b9581bfdb9" />![Uploading Screenshot 2026-09-12 172926.png…]()
+* |
 
 | Real-Time ATS Audit & 1-Click AI Fixes | Master CareerOps Baseline Profile |
 |:---:|:---:|
