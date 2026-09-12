@@ -21,7 +21,9 @@
 
 ## 🖼️ Hero Section
 
-![AI-Powered Resume Builder Interface](<img width="1917" height="877" alt="Screenshot 2026-09-12 175440" src="https://github.com/user-attachments/assets/44ecb6f9-9d95-483d-b34c-a77e9bdfe02b" />)
+<p align="center">
+  <img width="1917" height="877" alt="Screenshot 2026-09-12 175440" src="https://github.com/user-attachments/assets/44ecb6f9-9d95-483d-b34c-a77e9bdfe02b">
+</p>
 
 ---
 
