@@ -81,8 +81,7 @@ graph TD
 
 ## ✨ Key Features
 
-![Platform Features Overview](docs/images/features.png)
-
+![Platform Features Overview](<img width="1911" height="871" alt="Screenshot 2026-09-12 175153" src="https://github.com/user-attachments/assets/18a9f55e-c09b-49a2-8a26-73297c69aa7c" />
 ### Visual Showcase
 
 | WYSIWYG Resume Canvas & Controls | AI Co-Pilot & 1-Click Action Proposals |
