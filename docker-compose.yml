@@ -21,6 +21,8 @@ services:
 
   frontend:
     build: ./FrontEnd
+    environment:
+      - BACKEND_HOST=backend
     container_name: frontend
     ports:
       - "5173:80"
