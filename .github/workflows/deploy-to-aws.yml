@@ -53,7 +53,7 @@ jobs:
         env:
           REGISTRY: ${{ steps.ecr-login.outputs.registry }}
         run: |
-          docker build -t $REGISTRY/$ECR_FRONTEND_REPO:${{ github.sha }} -t $REGISTRY/$ECR_FRONTEND_REPO:latest ./client
+          docker build -t $REGISTRY/$ECR_FRONTEND_REPO:${{ github.sha }} -t $REGISTRY/$ECR_FRONTEND_REPO:latest ./FrontEnd
           docker push $REGISTRY/$ECR_FRONTEND_REPO:${{ github.sha }}
           docker push $REGISTRY/$ECR_FRONTEND_REPO:latest
 
