@@ -4,7 +4,7 @@ import { auth } from "./firebase";
 // Create an Axios instance configured with the /api base URL
 // Vite's proxy will route these to the BackEnd
 const api = axios.create({
-  baseURL: "/api",
+  baseURL: import.meta.env.VITE_API_URL || "/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -18,7 +18,7 @@ api.interceptors.request.use(
       try {
         token = await auth.currentUser.getIdToken();
         localStorage.setItem("token", token);
-      } catch (_e) {
+      } catch {
         // use existing cached token
       }
     }
@@ -50,7 +50,7 @@ api.interceptors.response.use(
         localStorage.setItem("token", freshToken);
         originalRequest.headers.Authorization = `Bearer ${freshToken}`;
         return api(originalRequest);
-      } catch (_refreshError) {
+      } catch {
         // Refresh failed, proceed to logout
       }
     }

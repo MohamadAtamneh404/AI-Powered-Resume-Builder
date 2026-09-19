@@ -33,8 +33,26 @@ function ensureUser(req, res) {
 
 // Only accept allowed fields
 function pickResumeFields(body = {}) {
-  const { title, templateId, theme, style, basics, blocks, resumeData, atsScore } = body;
-  return { title, templateId, theme, style, basics, blocks, resumeData, atsScore };
+  const {
+    title,
+    templateId,
+    theme,
+    style,
+    basics,
+    blocks,
+    resumeData,
+    atsScore,
+  } = body;
+  return {
+    title,
+    templateId,
+    theme,
+    style,
+    basics,
+    blocks,
+    resumeData,
+    atsScore,
+  };
 }
 
 const { calculateAtsScore } = require("../utils/atsScorer");
@@ -46,10 +64,14 @@ function toClient(doc) {
   delete obj.__v;
   try {
     const atsResult = calculateAtsScore(obj);
-    obj.atsScore = typeof obj.atsScore === "number" && obj.atsScore > 0 ? obj.atsScore : atsResult.score;
+    obj.atsScore =
+      typeof obj.atsScore === "number" && obj.atsScore > 0
+        ? obj.atsScore
+        : atsResult.score;
     obj.atsBreakdown = atsResult.breakdown;
   } catch (_e) {
-    obj.atsScore = typeof obj.atsScore === "number" && obj.atsScore > 0 ? obj.atsScore : 75;
+    obj.atsScore =
+      typeof obj.atsScore === "number" && obj.atsScore > 0 ? obj.atsScore : 75;
   }
   return obj;
 }
@@ -214,25 +236,33 @@ router.post("/render", authenticateToken, async (req, res, next) => {
 // =============================
 router.post("/export-pdf", async (req, res, next) => {
   try {
-    const { html: componentHtml, templateId, embedAtsJson, resumeData } = req.body;
+    const {
+      html: componentHtml,
+      templateId,
+      embedAtsJson,
+      resumeData,
+    } = req.body;
     if (!componentHtml) {
       return res.status(400).json({ message: "HTML content is required" });
     }
 
-    const jsonLdScript = (embedAtsJson && resumeData) ? `
+    const jsonLdScript =
+      embedAtsJson && resumeData
+        ? `
     <script type="application/ld+json">
       ${JSON.stringify({
         "@context": "https://schema.org",
         "@type": "Person",
-        "name": resumeData?.basics?.name || "",
-        "jobTitle": resumeData?.basics?.label || "",
-        "email": resumeData?.basics?.email || "",
-        "telephone": resumeData?.basics?.phone || "",
-        "url": resumeData?.basics?.url || "",
-        "description": resumeData?.basics?.summary || "",
+        name: resumeData?.basics?.name || "",
+        jobTitle: resumeData?.basics?.label || "",
+        email: resumeData?.basics?.email || "",
+        telephone: resumeData?.basics?.phone || "",
+        url: resumeData?.basics?.url || "",
+        description: resumeData?.basics?.summary || "",
       })}
     </script>
-    ` : "";
+    `
+        : "";
 
     // Build unified HTML document for Puppeteer rendering
     const finalHtml = `<!DOCTYPE html>
@@ -339,6 +369,13 @@ router.post("/export-pdf", async (req, res, next) => {
 </html>`;
 
     const puppeteer = req.app.get("puppeteer");
+    if (!puppeteer) {
+      return res.status(501).json({
+        success: false,
+        error:
+          "Server-side PDF generation is unavailable in this environment. Please use client-side print / export.",
+      });
+    }
     const browser = await puppeteer.launch({
       headless: true,
       args: [
@@ -351,7 +388,10 @@ router.post("/export-pdf", async (req, res, next) => {
 
     const page = await browser.newPage();
     await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 2 });
-    await page.setContent(finalHtml, { waitUntil: "networkidle0", timeout: 25000 });
+    await page.setContent(finalHtml, {
+      waitUntil: "networkidle0",
+      timeout: 25000,
+    });
 
     const pdf = await page.pdf({
       format: "A4",

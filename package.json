@@ -1,0 +1,11 @@
+{
+  "name": "ai-powered-resume-builder",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npm run build --prefix FrontEnd",
+    "start": "npm start --prefix BackEnd",
+    "dev:frontend": "npm run dev --prefix FrontEnd",
+    "dev:backend": "npm run dev --prefix BackEnd"
+  }
+}
