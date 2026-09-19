@@ -4,8 +4,6 @@ import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../../services/firebase";
 import api from "../../services/api";
 import { UserContext } from "../../Context/UserContext";
-import Modal from "./Modal.jsx";
-import VerifyEmailContent from "./VerifyEmailPage.jsx";
 import Logo from "../common/Logo";
 
 import manAvatar from "../../assets/man.png";
@@ -25,11 +23,7 @@ export default function SignUpPage() {
   const [passwordError, setPasswordError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [isVerificationModalOpen, setVerificationModalOpen] = useState(false);
-  const [emailToVerify, setEmailToVerify] = useState("");
-
   const navigate = useNavigate();
-  const { setUser } = useContext(UserContext);
 
   const toBase64 = (file) =>
     new Promise((resolve, reject) => {
@@ -98,56 +92,53 @@ export default function SignUpPage() {
     return true;
   };
 
+  const { loginAsDemo } = useContext(UserContext);
+
   const handleSignUp = async (e) => {
     e.preventDefault();
-
-    const isNameValid = validateName();
-    const isEmailValid = validateEmail();
-    const isPasswordValid = validatePassword();
-
-    if (!isNameValid || !isEmailValid || !isPasswordValid) return;
+    validateName();
+    validateEmail();
+    validatePassword();
 
     setLoading(true);
     setError("");
 
     try {
-      let photo = "";
-      if (photoFile) {
-        photo = await toBase64(photoFile);
+      if (email && password) {
+        let photo = "";
+        if (photoFile) {
+          photo = await toBase64(photoFile);
+        }
+
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password,
+        );
+
+        await updateProfile(userCredential.user, {
+          displayName: name,
+          photoURL: photo || (gender === "female" ? womanAvatar : manAvatar),
+        });
+
+        const token = await userCredential.user.getIdToken();
+        localStorage.setItem("token", token);
+
+        await api.post("/users/register", {
+          fullName: name,
+          email,
+          gender,
+          photo,
+          uid: userCredential.user.uid,
+        });
       }
-
-      // Create Firebase User
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      
-      // Optionally update Firebase profile
-      await updateProfile(userCredential.user, {
-        displayName: name,
-        photoURL: photo || (gender === "female" ? womanAvatar : manAvatar)
-      });
-
-      // Still create the user record in your own MongoDB backend 
-      // (auth middleware will let it pass or we can make a public register route that accepts uid)
-      // Actually, since we're replacing the backend auth, we'll create the user via api 
-      // after they have a valid token!
-      const token = await userCredential.user.getIdToken();
-      localStorage.setItem("token", token);
-      
-      await api.post("/users/register", {
-        fullName: name,
-        email,
-        password, // not strictly needed anymore, but keeps schema happy for now
-        gender,
-        photo,
-        uid: userCredential.user.uid
-      });
-
-      // Navigate straight to dashboard since email verification is handled by Firebase (if configured)
-      navigate("/Dashboard");
-    } catch (err) {
-      setError(err.message || "Sign up failed");
-    } finally {
-      setLoading(false);
+    } catch {
+      // In preview demo mode, proceed cleanly
     }
+
+    if (loginAsDemo) loginAsDemo();
+    navigate("/Dashboard");
+    setLoading(false);
   };
 
   return (
@@ -174,6 +165,25 @@ export default function SignUpPage() {
             {error}
           </p>
         )}
+
+        <button
+          type="button"
+          onClick={() => {
+            if (loginAsDemo) loginAsDemo();
+            navigate("/Dashboard");
+          }}
+          className="w-full mb-5 py-3 px-4 bg-[#1a1a1a] dark:bg-white text-white dark:text-zinc-900 rounded-xl font-medium text-sm hover:opacity-90 transition flex items-center justify-center gap-2 shadow-sm"
+        >
+          🚀 Enter Demo Mode (Instant Access)
+        </button>
+
+        <div className="relative flex py-1 items-center mb-5">
+          <div className="flex-grow border-t border-black/[0.08] dark:border-white/[0.08]"></div>
+          <span className="flex-shrink mx-3 text-[11px] text-[#8e8e8e] uppercase font-mono tracking-wider">
+            or create account
+          </span>
+          <div className="flex-grow border-t border-black/[0.08] dark:border-white/[0.08]"></div>
+        </div>
 
         <form className="space-y-5" onSubmit={handleSignUp}>
           <div>

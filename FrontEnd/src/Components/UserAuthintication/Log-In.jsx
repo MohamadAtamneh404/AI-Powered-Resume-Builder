@@ -1,10 +1,8 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../services/firebase";
-import api from "../../services/api";
 import { UserContext } from "../../Context/UserContext";
 import Logo from "../common/Logo";
 
@@ -35,24 +33,24 @@ export default function LoginPage() {
     return true;
   };
 
+  const { loginAsDemo } = useContext(UserContext);
+
   const handleLogin = async (e) => {
     e.preventDefault();
-    const isEmailValid = validateEmail();
-    const isPasswordValid = validatePassword();
-
-    if (!isEmailValid || !isPasswordValid) return;
-
     setLoading(true);
     setError("");
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // Firebase auth listener in UserContext handles the rest
-      navigate("/Dashboard");
-    } catch (err) {
-      setError(err.message || "Login failed");
-    } finally {
-      setLoading(false);
+      if (email && password) {
+        await signInWithEmailAndPassword(auth, email, password);
+      }
+    } catch {
+      // In preview demo mode, proceed to dashboard
     }
+    if (loginAsDemo) {
+      loginAsDemo();
+    }
+    navigate("/Dashboard");
+    setLoading(false);
   };
 
   return (
@@ -107,6 +105,25 @@ export default function LoginPage() {
               {error}
             </motion.div>
           )}
+
+          <button
+            type="button"
+            onClick={() => {
+              if (loginAsDemo) loginAsDemo();
+              navigate("/Dashboard");
+            }}
+            className="w-full mb-5 py-3 px-4 bg-[#1a1a1a] dark:bg-white text-white dark:text-zinc-900 rounded-xl font-medium text-sm hover:opacity-90 transition flex items-center justify-center gap-2 shadow-sm"
+          >
+            🚀 Enter Demo Mode (Instant Access)
+          </button>
+
+          <div className="relative flex py-1 items-center mb-5">
+            <div className="flex-grow border-t border-black/[0.08] dark:border-white/[0.08]"></div>
+            <span className="flex-shrink mx-3 text-[11px] text-[#8e8e8e] uppercase font-mono tracking-wider">
+              or sign in with email
+            </span>
+            <div className="flex-grow border-t border-black/[0.08] dark:border-white/[0.08]"></div>
+          </div>
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
