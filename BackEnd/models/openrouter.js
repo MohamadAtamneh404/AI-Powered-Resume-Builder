@@ -1,9 +1,9 @@
 "use strict";
 
 const DEFAULT_FALLBACK_MODELS = [
+  "aion-labs/aion-3.5",
   "google/gemini-2.5-flash",
   "openai/gpt-4o-mini",
-  "deepseek/deepseek-chat",
 ];
 
 function getFallbackModels() {
@@ -21,10 +21,9 @@ function getFallbackModels() {
 }
 
 function getSafeMaxTokens() {
-  const configured = Number(process.env.OPENROUTER_MAX_TOKENS || 2500);
-  if (isNaN(configured) || configured <= 0) return 2500;
-  // Strictly enforce 2000–3000 range to prevent OpenRouter upfront 402 credit reservation errors
-  return Math.min(Math.max(configured, 2000), 3000);
+  const configured = Number(process.env.OPENROUTER_MAX_TOKENS || 1000);
+  if (isNaN(configured) || configured <= 0) return 1000;
+  return Math.min(Math.max(configured, 100), 3000);
 }
 
 // Recursively remove keys Gemini/OpenRouter doesn't accept in responseSchema
@@ -46,25 +45,132 @@ function sanitizeSchema(schema) {
   return out;
 }
 
+function cleanAndParseJson(text) {
+  // Strip out <think>...</think> blocks from reasoning models (DeepSeek, etc.)
+  let cleaned = text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+
+  // Clean up potential markdown JSON block
+  let jsonText = cleaned
+    .trim()
+    .replace(/^```json\s*/i, "")
+    .replace(/```$/i, "")
+    .trim();
+
+  // Best-effort cleanup of trailing commas
+  jsonText = jsonText.replace(/,\s*([}\]])/g, "$1");
+
+  try {
+    return JSON.parse(jsonText);
+  } catch (parseError) {
+    // 1. Attempt to find JSON object bounds
+    const start = jsonText.indexOf("{");
+    const end = jsonText.lastIndexOf("}");
+    if (start !== -1 && end !== -1 && end > start) {
+      try {
+        return JSON.parse(jsonText.slice(start, end + 1));
+      } catch (_) {}
+    }
+
+    // 2. Attempt to repair truncated JSON
+    try {
+      const repaired = repairTruncatedJson(jsonText.slice(Math.max(0, start)));
+      return JSON.parse(repaired);
+    } catch (_) {}
+
+    const excerpt = jsonText.slice(0, 250).replace(/\s+/g, " ");
+    throw new Error(`Failed to parse JSON response. Excerpt: ${excerpt}`);
+  }
+}
+
+/**
+ * generateJsonViaGroq
+ * Free, ultra-fast LPU inference (30 RPM, 14,400 RPD) via Groq (https://console.groq.com/keys)
+ */
+async function generateJsonViaGroq({ system, userText, model }) {
+  const apiKey = process.env.GROQ_API_KEY?.trim();
+  if (!apiKey) return null;
+
+  const candidateModels = Array.from(
+    new Set(
+      [
+        model,
+        process.env.GROQ_MODEL,
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.8-27b",
+        "openai/gpt-oss-20b",
+        "llama-3.3-70b-versatile",
+      ].filter(Boolean),
+    ),
+  );
+
+  for (const targetModel of candidateModels) {
+    const payload = {
+      model: targetModel,
+      temperature: 0.6,
+      max_tokens: 2048,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: userText },
+      ],
+      response_format: { type: "json_object" },
+    };
+
+    try {
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.warn(`⚠️ Groq model "${targetModel}" returned ${response.status}: ${errText}. Trying next Groq model...`);
+        continue;
+      }
+
+      const data = await response.json();
+      const text = data?.choices?.[0]?.message?.content || "";
+      console.log(`⚡ Groq completion successful via free model "${targetModel}"!`);
+      return cleanAndParseJson(text);
+    } catch (err) {
+      console.warn(`⚠️ Groq model "${targetModel}" error:`, err.message, ". Trying next...");
+    }
+  }
+
+  console.warn("⚠️ All Groq models failed. Falling back to OpenRouter...");
+  return null;
+}
+
 /**
  * generateJson
- * Use OpenRouter with automatic model fallback routing and application/json output.
- * Params:
- * - system: string (system instruction)
- * - user: string|object (payload; stringified if object)
- * - schema: optional schema (subset) to shape output
+ * Attempts Groq first (free, ultra-fast 14,400 RPD tier) if configured,
+ * then falls back automatically to OpenRouter.
  */
-async function generateJson({ system, user, schema, models: customModels }) {
+async function generateJson({ system, user, schema, models: customModels, preferredEngine }) {
+  const userText = typeof user === "string" ? user : JSON.stringify(user ?? {});
+
+  // 1. If Groq is configured and preferred/default, use Groq free tier
+  const groqKey = process.env.GROQ_API_KEY?.trim();
+  const prefersGroq = preferredEngine === "groq" ||
+    (Array.isArray(customModels) && customModels.some((m) => m.includes("llama-3.3") || m.includes("groq")));
+
+  if (groqKey && (prefersGroq || !customModels || customModels.length === 0)) {
+    const groqResult = await generateJsonViaGroq({ system, userText });
+    if (groqResult) return groqResult;
+  }
+
+  // 2. OpenRouter routing
   const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
+  if (!apiKey && !groqKey) {
     throw new Error(
-      "Missing OpenRouter API key. Please set OPENROUTER_API_KEY in your BackEnd/.env file.",
+      "Missing AI API key. Please set GROQ_API_KEY (100% free at https://console.groq.com/keys) or OPENROUTER_API_KEY in your BackEnd/.env file.",
     );
   }
 
-  const userText = typeof user === "string" ? user : JSON.stringify(user ?? {});
   const cleanedSchema = schema ? sanitizeSchema(schema) : undefined;
-
   const models = (customModels && Array.isArray(customModels) && customModels.length > 0)
     ? customModels.slice(0, 3)
     : getFallbackModels();
@@ -110,7 +216,7 @@ async function generateJson({ system, user, schema, models: customModels }) {
 
       if (statusCode === 402 || errorCode === 402) {
         throw new Error(
-          `OpenRouter Credit Error (402): Account balance depleted or requested token reserve exceeded. Please reduce max_tokens or purchase credits at https://openrouter.ai/settings/credits. OpenRouter message: "${errorMsg}"`,
+          `OpenRouter Credit Error (402): Account balance depleted or requested token reserve exceeded. Note: You can switch to Groq (14,400 free requests/day at https://console.groq.com/keys) by setting GROQ_API_KEY in BackEnd/.env. OpenRouter message: "${errorMsg}"`,
         );
       }
 
@@ -134,42 +240,9 @@ async function generateJson({ system, user, schema, models: customModels }) {
       console.warn("⚠️ OpenRouter warning: generation hit max_tokens limit and was truncated.");
     }
 
-    // Strip out <think>...</think> blocks from reasoning models (DeepSeek, etc.)
-    text = text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
-
-    // Clean up potential markdown JSON block
-    let jsonText = text
-      .trim()
-      .replace(/^```json\s*/i, "")
-      .replace(/```$/i, "")
-      .trim();
-
-    // Best-effort cleanup of trailing commas
-    jsonText = jsonText.replace(/,\s*([}\]])/g, "$1");
-
-    try {
-      return JSON.parse(jsonText);
-    } catch (parseError) {
-      // 1. Attempt to find JSON object bounds
-      const start = jsonText.indexOf("{");
-      const end = jsonText.lastIndexOf("}");
-      if (start !== -1 && end !== -1 && end > start) {
-        try {
-          return JSON.parse(jsonText.slice(start, end + 1));
-        } catch (_) {}
-      }
-
-      // 2. Attempt to repair truncated JSON
-      try {
-        const repaired = repairTruncatedJson(jsonText.slice(Math.max(0, start)));
-        return JSON.parse(repaired);
-      } catch (_) {}
-
-      const excerpt = jsonText.slice(0, 250).replace(/\s+/g, " ");
-      throw new Error(`Failed to parse JSON response. Excerpt: ${excerpt}`);
-    }
+    return cleanAndParseJson(text);
   } catch (error) {
-    console.error("Error generating content with OpenRouter:", error);
+    console.error("Error generating content with AI:", error);
     throw error;
   }
 }

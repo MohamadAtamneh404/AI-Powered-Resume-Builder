@@ -88,7 +88,7 @@ const ResumeCard = ({ resume, onDelete }) => {
           {onDelete && (
             <button
               onClick={() => onDelete(resumeId)}
-              className="p-2 text-[#8e8e8e] dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-full hover:bg-rose-50 dark:hover:bg-rose-500/10 transition"
+              className="p-2 text-rose-400 dark:text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 rounded-full hover:bg-rose-50 dark:hover:bg-rose-500/10 transition"
               title="Delete Resume"
             >
               <Trash2 size={16} />

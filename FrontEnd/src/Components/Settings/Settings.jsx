@@ -160,7 +160,9 @@ export default function Settings() {
 
   const removeExperienceBullet = (expIndex, bulletIndex) => {
     const updated = [...careerExperiences];
-    const currentHighlights = updated[expIndex].highlights.filter((_, i) => i !== bulletIndex);
+    const currentHighlights = updated[expIndex].highlights.filter(
+      (_, i) => i !== bulletIndex,
+    );
     updated[expIndex] = { ...updated[expIndex], highlights: currentHighlights };
     setCareerExperiences(updated);
   };
@@ -225,13 +227,16 @@ export default function Settings() {
       }
       setMessage({
         type: "success",
-        content: "Master Career Baseline Profile (CareerOps) saved successfully! All new resumes will derive from this profile.",
+        content:
+          "Master Career Baseline Profile (CareerOps) saved successfully! All new resumes will derive from this profile.",
       });
     } catch (err) {
       console.error("Save career profile error:", err);
       setMessage({
         type: "error",
-        content: err.response?.data?.message || "Failed to save career baseline profile.",
+        content:
+          err.response?.data?.message ||
+          "Failed to save career baseline profile.",
       });
     } finally {
       setCareerSaving(false);
@@ -242,7 +247,8 @@ export default function Settings() {
     if (!rawCareerNotes.trim()) {
       setMessage({
         type: "error",
-        content: "Please enter your raw notes, past resume, or LinkedIn summary first.",
+        content:
+          "Please enter your raw notes, past resume, or LinkedIn summary first.",
       });
       return;
     }
@@ -269,18 +275,22 @@ export default function Settings() {
         if (p.linkedin) setCareerLinkedin(p.linkedin);
         if (p.github) setCareerGithub(p.github);
         if (p.website) setCareerWebsite(p.website);
-        if (Array.isArray(p.skills) && p.skills.length > 0) setCareerSkills(p.skills);
+        if (Array.isArray(p.skills) && p.skills.length > 0)
+          setCareerSkills(p.skills);
         if (Array.isArray(p.experiences) && p.experiences.length > 0) {
           setCareerExperiences(
             p.experiences.map((exp) => {
-              const dates = typeof exp.dates === "string" ? exp.dates.split(/[-–—]/) : [];
-              const rawBullets = Array.isArray(exp.highlights) && exp.highlights.length > 0
-                ? exp.highlights
-                : Array.isArray(exp.bulletPoints) && exp.bulletPoints.length > 0
-                  ? exp.bulletPoints
-                  : Array.isArray(exp.bullets) && exp.bullets.length > 0
-                    ? exp.bullets
-                    : [""];
+              const dates =
+                typeof exp.dates === "string" ? exp.dates.split(/[-–—]/) : [];
+              const rawBullets =
+                Array.isArray(exp.highlights) && exp.highlights.length > 0
+                  ? exp.highlights
+                  : Array.isArray(exp.bulletPoints) &&
+                      exp.bulletPoints.length > 0
+                    ? exp.bulletPoints
+                    : Array.isArray(exp.bullets) && exp.bullets.length > 0
+                      ? exp.bullets
+                      : [""];
               return {
                 company: exp.company || "",
                 position: exp.position || exp.role || "",
@@ -288,7 +298,7 @@ export default function Settings() {
                 endDate: exp.endDate || (dates[1] ? dates[1].trim() : ""),
                 highlights: rawBullets,
               };
-            })
+            }),
           );
         }
         if (Array.isArray(p.education) && p.education.length > 0) {
@@ -298,7 +308,7 @@ export default function Settings() {
               degree: edu.degree || "",
               startDate: edu.startDate || "",
               endDate: edu.endDate || "",
-            }))
+            })),
           );
         }
         if (Array.isArray(p.projects) && p.projects.length > 0) {
@@ -308,12 +318,13 @@ export default function Settings() {
               description: proj.description || proj.summary || "",
               technologies: proj.technologies || proj.techStack || "",
               url: proj.url || proj.link || "",
-            }))
+            })),
           );
         }
         setMessage({
           type: "success",
-          content: "✨ Career baseline auto-extracted successfully by AI! Review below and click 'Save Career Baseline Profile'.",
+          content:
+            "✨ Career baseline auto-extracted successfully by AI! Review below and click 'Save Career Baseline Profile'.",
         });
         setShowAiExtractor(false);
       }
@@ -321,7 +332,9 @@ export default function Settings() {
       console.error("AI Extract Baseline error:", err);
       setMessage({
         type: "error",
-        content: err.response?.data?.message || "Failed to auto-extract career baseline with AI.",
+        content:
+          err.response?.data?.message ||
+          "Failed to auto-extract career baseline with AI.",
       });
     } finally {
       setAiExtracting(false);
@@ -345,14 +358,16 @@ export default function Settings() {
         setCareerBio(res.data.bio);
         setMessage({
           type: "success",
-          content: "✨ Master career bio polished with executive clarity by AI!",
+          content:
+            "✨ Master career bio polished with executive clarity by AI!",
         });
       }
     } catch (err) {
       console.error("AI Polish Bio error:", err);
       setMessage({
         type: "error",
-        content: err.response?.data?.message || "Failed to polish career bio with AI.",
+        content:
+          err.response?.data?.message || "Failed to polish career bio with AI.",
       });
     } finally {
       setAiPolishingBio(false);
@@ -382,14 +397,16 @@ export default function Settings() {
       } else {
         setMessage({
           type: "info",
-          content: "Your skills inventory already includes the recommended core skills for this role.",
+          content:
+            "Your skills inventory already includes the recommended core skills for this role.",
         });
       }
     } catch (err) {
       console.error("AI Suggest Skills error:", err);
       setMessage({
         type: "error",
-        content: err.response?.data?.message || "Failed to suggest skills with AI.",
+        content:
+          err.response?.data?.message || "Failed to suggest skills with AI.",
       });
     } finally {
       setAiSuggestingSkills(false);
@@ -424,7 +441,9 @@ export default function Settings() {
       console.error("AI Enrich Experience error:", err);
       setMessage({
         type: "error",
-        content: err.response?.data?.message || "Failed to enrich experience bullets with AI.",
+        content:
+          err.response?.data?.message ||
+          "Failed to enrich experience bullets with AI.",
       });
     } finally {
       setAiEnrichingExpIdx(null);
@@ -509,9 +528,12 @@ export default function Settings() {
         if (cp.linkedin) setCareerLinkedin(cp.linkedin);
         if (cp.github) setCareerGithub(cp.github);
         if (cp.website) setCareerWebsite(cp.website);
-        if (Array.isArray(cp.skills) && cp.skills.length > 0) setCareerSkills(cp.skills);
-        if (Array.isArray(cp.experiences) && cp.experiences.length > 0) setCareerExperiences(cp.experiences);
-        if (Array.isArray(cp.education) && cp.education.length > 0) setCareerEducation(cp.education);
+        if (Array.isArray(cp.skills) && cp.skills.length > 0)
+          setCareerSkills(cp.skills);
+        if (Array.isArray(cp.experiences) && cp.experiences.length > 0)
+          setCareerExperiences(cp.experiences);
+        if (Array.isArray(cp.education) && cp.education.length > 0)
+          setCareerEducation(cp.education);
         if (Array.isArray(cp.projects)) setCareerProjects(cp.projects);
       }
     }
@@ -645,7 +667,8 @@ export default function Settings() {
     } catch (err) {
       setMessage({
         type: "error",
-        content: err.response?.data?.message || "Failed to save Copilot tuning.",
+        content:
+          err.response?.data?.message || "Failed to save Copilot tuning.",
       });
     } finally {
       setLoading(false);
@@ -671,7 +694,8 @@ export default function Settings() {
     } catch (err) {
       setMessage({
         type: "error",
-        content: err.response?.data?.message || "Failed to update subscription tier.",
+        content:
+          err.response?.data?.message || "Failed to update subscription tier.",
       });
     } finally {
       setLoading(false);
@@ -682,7 +706,9 @@ export default function Settings() {
     setLoading(true);
     setMessage({ type: "", content: "" });
     try {
-      const res = await api.post("/user/subscription", { action: "reset_quota" });
+      const res = await api.post("/user/subscription", {
+        action: "reset_quota",
+      });
       if (res.data?.user) {
         setUser(res.data.user);
         setTelemetry((prev) => ({
@@ -730,7 +756,8 @@ export default function Settings() {
           Account & Preferences
         </h1>
         <p className="mt-1 text-sm text-[#8e8e8e] dark:text-zinc-400">
-          Manage your master career baseline (CareerOps), ATS parser compliance rules, AI generation tone, and account security.
+          Manage your master career baseline (CareerOps), ATS parser compliance
+          rules, AI generation tone, and account security.
         </p>
       </div>
 
@@ -985,17 +1012,23 @@ export default function Settings() {
                     <span>💼</span> Master Career Baseline Profile (CareerOps)
                   </h2>
                   <p className="text-xs text-[#8e8e8e] dark:text-zinc-400 mt-1">
-                    Your single source of truth for all resumes and AI tailoring. Edit your master baseline once, and all new resumes will seed and sync directly from this data.
+                    Your single source of truth for all resumes and AI
+                    tailoring. Edit your master baseline once, and all new
+                    resumes will seed and sync directly from this data.
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setShowAiExtractor(!showAiExtractor)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white shadow-sm transition cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[#9fff00] text-black hover:bg-[#8fee00] text-white shadow-sm transition cursor-pointer"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>{showAiExtractor ? "Close AI Auto-Pilot" : "✨ AI Auto-Pilot"}</span>
+                    <span>
+                      {showAiExtractor
+                        ? "Close AI Auto-Pilot"
+                        : "✨ AI Auto-Pilot"}
+                    </span>
                   </button>
                   <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#9fff00]/20 text-[#1a1a1a] dark:text-[#9fff00] border border-[#9fff00]">
                     CareerOps Sync Ready
@@ -1005,9 +1038,9 @@ export default function Settings() {
 
               {/* Collapsible AI Auto-Pilot Box */}
               {showAiExtractor && (
-                <div className="mt-4 p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 via-indigo-500/5 to-transparent border border-purple-500/30 space-y-3">
+                <div className="mt-4 p-4 rounded-2xl bg-zinc-900/10 border border-[#9fff00]/30 space-y-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center text-white text-xs">
+                    <div className="w-7 h-7 rounded-lg bg-[#9fff00] text-black flex items-center justify-center text-white text-xs">
                       <Sparkles className="w-4 h-4" />
                     </div>
                     <div>
@@ -1015,7 +1048,9 @@ export default function Settings() {
                         AI Career Baseline Auto-Pilot
                       </h4>
                       <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                        Paste unformatted notes, an old CV, or a LinkedIn summary. AI will parse, structure, and populate your entire master profile without inventing fake details.
+                        Paste unformatted notes, an old CV, or a LinkedIn
+                        summary. AI will parse, structure, and populate your
+                        entire master profile without inventing fake details.
                       </p>
                     </div>
                   </div>
@@ -1024,7 +1059,7 @@ export default function Settings() {
                     value={rawCareerNotes}
                     onChange={(e) => setRawCareerNotes(e.target.value)}
                     placeholder="Paste unformatted resume text, notes, LinkedIn 'About' & work history here..."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-zinc-800 border border-purple-300 dark:border-purple-800 text-xs text-[#1a1a1a] dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-zinc-800 border border-[#9fff00] dark:border-[#9fff00] text-xs text-[#1a1a1a] dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-[#9fff00]"
                   />
                   <div className="flex justify-end gap-2">
                     <button
@@ -1038,7 +1073,7 @@ export default function Settings() {
                       type="button"
                       disabled={aiExtracting || !rawCareerNotes.trim()}
                       onClick={handleAiExtractBaseline}
-                      className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-bold transition shadow-sm cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#9fff00] text-black hover:bg-[#8fee00] disabled:opacity-50 text-white text-xs font-bold transition shadow-sm cursor-pointer"
                     >
                       {aiExtracting ? (
                         <>
@@ -1085,11 +1120,19 @@ export default function Settings() {
                       value={careerSeniority}
                       onChange={(e) => setCareerSeniority(e.target.value)}
                     >
-                      <option value="Entry / Associate (0-2 yrs)">Entry / Associate (0-2 yrs)</option>
-                      <option value="Mid-Level (3-5 yrs)">Mid-Level (3-5 yrs)</option>
+                      <option value="Entry / Associate (0-2 yrs)">
+                        Entry / Associate (0-2 yrs)
+                      </option>
+                      <option value="Mid-Level (3-5 yrs)">
+                        Mid-Level (3-5 yrs)
+                      </option>
                       <option value="Senior (5-8 yrs)">Senior (5-8 yrs)</option>
-                      <option value="Staff / Principal (8+ yrs)">Staff / Principal (8+ yrs)</option>
-                      <option value="Director / Executive">Director / Executive</option>
+                      <option value="Staff / Principal (8+ yrs)">
+                        Staff / Principal (8+ yrs)
+                      </option>
+                      <option value="Director / Executive">
+                        Director / Executive
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -1174,7 +1217,7 @@ export default function Settings() {
                     type="button"
                     disabled={aiPolishingBio}
                     onClick={handleAiPolishBio}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-800 transition cursor-pointer disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-zinc-100 dark:bg-[#9fff00]/10 text-[#1a1a1a] dark:text-[#9fff00] dark:text-[#9fff00] hover:bg-zinc-200 dark:hover:bg-[#9fff00]/20 border border-[#9fff00]/50 dark:border-[#9fff00] transition cursor-pointer disabled:opacity-50"
                   >
                     {aiPolishingBio ? (
                       <>
@@ -1209,7 +1252,7 @@ export default function Settings() {
                       type="button"
                       disabled={aiSuggestingSkills}
                       onClick={handleAiSuggestSkills}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-800 transition cursor-pointer disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-zinc-100 dark:bg-[#9fff00]/10 text-[#1a1a1a] dark:text-[#9fff00] dark:text-[#9fff00] hover:bg-zinc-200 dark:hover:bg-[#9fff00]/20 border border-[#9fff00]/50 dark:border-[#9fff00] transition cursor-pointer disabled:opacity-50"
                     >
                       {aiSuggestingSkills ? (
                         <>
@@ -1232,7 +1275,9 @@ export default function Settings() {
                 {/* Skill Badges */}
                 <div className="flex flex-wrap gap-2 p-3 rounded-2xl bg-[#EDEEF5]/40 dark:bg-zinc-800/40 border border-black/[0.06] dark:border-white/[0.08] min-h-[48px] items-center mb-3">
                   {careerSkills.length === 0 ? (
-                    <span className="text-xs text-zinc-400 italic">No skills added yet. Add your core skills below.</span>
+                    <span className="text-xs text-zinc-400 italic">
+                      No skills added yet. Add your core skills below.
+                    </span>
                   ) : (
                     careerSkills.map((sk) => (
                       <span
@@ -1278,7 +1323,9 @@ export default function Settings() {
 
                 {/* Quick suggestions */}
                 <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-zinc-500">
-                  <span className="font-semibold text-zinc-700 dark:text-zinc-300">Quick Add:</span>
+                  <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                    Quick Add:
+                  </span>
                   {[
                     "TypeScript",
                     "React",
@@ -1314,7 +1361,7 @@ export default function Settings() {
                   <button
                     type="button"
                     onClick={addCareerExperience}
-                    className="text-xs font-semibold text-purple-600 dark:text-purple-400 hover:underline"
+                    className="text-xs font-semibold text-[#1a1a1a] dark:text-[#9fff00] dark:text-[#9fff00] hover:underline"
                   >
                     + Add Experience Role
                   </button>
@@ -1350,7 +1397,13 @@ export default function Settings() {
                             type="text"
                             className="w-full px-3 py-2 rounded-xl bg-white dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-xs text-[#1a1a1a] dark:text-zinc-100"
                             value={exp.company || ""}
-                            onChange={(e) => updateCareerExperience(expIdx, "company", e.target.value)}
+                            onChange={(e) =>
+                              updateCareerExperience(
+                                expIdx,
+                                "company",
+                                e.target.value,
+                              )
+                            }
                             placeholder="e.g. Acme Tech"
                           />
                         </div>
@@ -1362,7 +1415,13 @@ export default function Settings() {
                             type="text"
                             className="w-full px-3 py-2 rounded-xl bg-white dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-xs text-[#1a1a1a] dark:text-zinc-100"
                             value={exp.position || ""}
-                            onChange={(e) => updateCareerExperience(expIdx, "position", e.target.value)}
+                            onChange={(e) =>
+                              updateCareerExperience(
+                                expIdx,
+                                "position",
+                                e.target.value,
+                              )
+                            }
                             placeholder="e.g. Lead Software Engineer"
                           />
                         </div>
@@ -1374,7 +1433,13 @@ export default function Settings() {
                             type="text"
                             className="w-full px-3 py-2 rounded-xl bg-white dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-xs text-[#1a1a1a] dark:text-zinc-100"
                             value={exp.startDate || ""}
-                            onChange={(e) => updateCareerExperience(expIdx, "startDate", e.target.value)}
+                            onChange={(e) =>
+                              updateCareerExperience(
+                                expIdx,
+                                "startDate",
+                                e.target.value,
+                              )
+                            }
                             placeholder="e.g. 2021-03"
                           />
                         </div>
@@ -1386,7 +1451,13 @@ export default function Settings() {
                             type="text"
                             className="w-full px-3 py-2 rounded-xl bg-white dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-xs text-[#1a1a1a] dark:text-zinc-100"
                             value={exp.endDate || ""}
-                            onChange={(e) => updateCareerExperience(expIdx, "endDate", e.target.value)}
+                            onChange={(e) =>
+                              updateCareerExperience(
+                                expIdx,
+                                "endDate",
+                                e.target.value,
+                              )
+                            }
                             placeholder="e.g. Present"
                           />
                         </div>
@@ -1403,7 +1474,7 @@ export default function Settings() {
                               type="button"
                               disabled={aiEnrichingExpIdx === expIdx}
                               onClick={() => handleAiEnrichExperience(expIdx)}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-800 transition cursor-pointer disabled:opacity-50"
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-zinc-100 dark:bg-[#9fff00]/10 text-[#1a1a1a] dark:text-[#9fff00] dark:text-[#9fff00] hover:bg-zinc-200 dark:hover:bg-[#9fff00]/20 border border-[#9fff00]/50 dark:border-[#9fff00] transition cursor-pointer disabled:opacity-50"
                             >
                               {aiEnrichingExpIdx === expIdx ? (
                                 <>
@@ -1420,7 +1491,7 @@ export default function Settings() {
                             <button
                               type="button"
                               onClick={() => addExperienceBullet(expIdx)}
-                              className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 hover:underline"
+                              className="text-[11px] font-semibold text-[#1a1a1a] dark:text-[#9fff00] dark:text-[#9fff00] hover:underline"
                             >
                               + Add Bullet
                             </button>
@@ -1433,13 +1504,21 @@ export default function Settings() {
                               type="text"
                               className="flex-1 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-xs text-[#1a1a1a] dark:text-zinc-100"
                               value={bullet}
-                              onChange={(e) => updateExperienceBullet(expIdx, bIdx, e.target.value)}
+                              onChange={(e) =>
+                                updateExperienceBullet(
+                                  expIdx,
+                                  bIdx,
+                                  e.target.value,
+                                )
+                              }
                               placeholder="e.g. Scaled database throughput by 42% through query caching..."
                             />
                             {exp.highlights && exp.highlights.length > 1 && (
                               <button
                                 type="button"
-                                onClick={() => removeExperienceBullet(expIdx, bIdx)}
+                                onClick={() =>
+                                  removeExperienceBullet(expIdx, bIdx)
+                                }
                                 className="text-zinc-400 hover:text-rose-500 text-xs px-1"
                               >
                                 ✕
@@ -1462,7 +1541,7 @@ export default function Settings() {
                   <button
                     type="button"
                     onClick={addCareerEducation}
-                    className="text-xs font-semibold text-purple-600 dark:text-purple-400 hover:underline"
+                    className="text-xs font-semibold text-[#1a1a1a] dark:text-[#9fff00] dark:text-[#9fff00] hover:underline"
                   >
                     + Add Education
                   </button>
@@ -1482,7 +1561,13 @@ export default function Settings() {
                           type="text"
                           className="w-full px-3 py-2 rounded-xl bg-white dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-xs text-[#1a1a1a] dark:text-zinc-100"
                           value={edu.institution || ""}
-                          onChange={(e) => updateCareerEducation(eduIdx, "institution", e.target.value)}
+                          onChange={(e) =>
+                            updateCareerEducation(
+                              eduIdx,
+                              "institution",
+                              e.target.value,
+                            )
+                          }
                           placeholder="e.g. University of California, Berkeley"
                         />
                       </div>
@@ -1494,7 +1579,13 @@ export default function Settings() {
                           type="text"
                           className="w-full px-3 py-2 rounded-xl bg-white dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-xs text-[#1a1a1a] dark:text-zinc-100"
                           value={edu.degree || ""}
-                          onChange={(e) => updateCareerEducation(eduIdx, "degree", e.target.value)}
+                          onChange={(e) =>
+                            updateCareerEducation(
+                              eduIdx,
+                              "degree",
+                              e.target.value,
+                            )
+                          }
                           placeholder="B.S. Computer Science"
                         />
                       </div>
@@ -1507,7 +1598,13 @@ export default function Settings() {
                             type="text"
                             className="w-full px-3 py-2 rounded-xl bg-white dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-xs text-[#1a1a1a] dark:text-zinc-100"
                             value={edu.endDate || ""}
-                            onChange={(e) => updateCareerEducation(eduIdx, "endDate", e.target.value)}
+                            onChange={(e) =>
+                              updateCareerEducation(
+                                eduIdx,
+                                "endDate",
+                                e.target.value,
+                              )
+                            }
                             placeholder="e.g. 2018 - 2022"
                           />
                         </div>
@@ -1536,7 +1633,7 @@ export default function Settings() {
                   <button
                     type="button"
                     onClick={addCareerProject}
-                    className="text-xs font-semibold text-purple-600 dark:text-purple-400 hover:underline cursor-pointer"
+                    className="text-xs font-semibold text-[#1a1a1a] dark:text-[#9fff00] dark:text-[#9fff00] hover:underline cursor-pointer"
                   >
                     + Add Project
                   </button>
@@ -1545,7 +1642,8 @@ export default function Settings() {
                 <div className="space-y-4">
                   {careerProjects.length === 0 ? (
                     <div className="p-4 rounded-2xl border border-dashed border-black/[0.1] dark:border-white/[0.1] text-center text-xs text-zinc-400">
-                      No standalone projects added yet. Click "+ Add Project" or extract from your notes with AI above.
+                      No standalone projects added yet. Click "+ Add Project" or
+                      extract from your notes with AI above.
                     </div>
                   ) : (
                     careerProjects.map((proj, projIdx) => (
@@ -1575,7 +1673,13 @@ export default function Settings() {
                               type="text"
                               className="w-full px-3 py-2 rounded-xl bg-white dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-xs text-[#1a1a1a] dark:text-zinc-100"
                               value={proj.name || ""}
-                              onChange={(e) => updateCareerProject(projIdx, "name", e.target.value)}
+                              onChange={(e) =>
+                                updateCareerProject(
+                                  projIdx,
+                                  "name",
+                                  e.target.value,
+                                )
+                              }
                               placeholder="e.g. AI Resume Builder"
                             />
                           </div>
@@ -1587,7 +1691,13 @@ export default function Settings() {
                               type="text"
                               className="w-full px-3 py-2 rounded-xl bg-white dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-xs text-[#1a1a1a] dark:text-zinc-100"
                               value={proj.url || ""}
-                              onChange={(e) => updateCareerProject(projIdx, "url", e.target.value)}
+                              onChange={(e) =>
+                                updateCareerProject(
+                                  projIdx,
+                                  "url",
+                                  e.target.value,
+                                )
+                              }
                               placeholder="e.g. https://github.com/user/project"
                             />
                           </div>
@@ -1601,7 +1711,13 @@ export default function Settings() {
                             type="text"
                             className="w-full px-3 py-2 rounded-xl bg-white dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-xs text-[#1a1a1a] dark:text-zinc-100"
                             value={proj.technologies || ""}
-                            onChange={(e) => updateCareerProject(projIdx, "technologies", e.target.value)}
+                            onChange={(e) =>
+                              updateCareerProject(
+                                projIdx,
+                                "technologies",
+                                e.target.value,
+                              )
+                            }
                             placeholder="e.g. React, Node.js, Tailwind CSS, OpenAI API"
                           />
                         </div>
@@ -1614,7 +1730,13 @@ export default function Settings() {
                             rows={2}
                             className="w-full px-3 py-2 rounded-xl bg-white dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-xs text-[#1a1a1a] dark:text-zinc-100 resize-none"
                             value={proj.description || ""}
-                            onChange={(e) => updateCareerProject(projIdx, "description", e.target.value)}
+                            onChange={(e) =>
+                              updateCareerProject(
+                                projIdx,
+                                "description",
+                                e.target.value,
+                              )
+                            }
                             placeholder="Architected full-stack resume platform serving 5k+ users with instant ATS score validation..."
                           />
                         </div>
@@ -1635,14 +1757,14 @@ export default function Settings() {
                 disabled={careerSaving}
                 className="px-6 py-2.5 bg-[#1a1a1a] hover:bg-black dark:bg-[#9fff00] dark:hover:bg-[#8fee00] disabled:opacity-50 text-white dark:text-black text-xs font-bold rounded-xl transition shadow-sm cursor-pointer"
               >
-                {careerSaving ? "Saving Baseline..." : "💾 Save Career Baseline Profile"}
+                {careerSaving
+                  ? "Saving Baseline..."
+                  : "💾 Save Career Baseline Profile"}
               </button>
             </div>
           </form>
         </div>
       )}
-
-
 
       {/* TAB 3: AI Copilot Tuning */}
       {activeTab === "copilot" && (
@@ -1689,7 +1811,7 @@ export default function Settings() {
                   onClick={() => setCopilotTone(t.id)}
                   className={`p-4 rounded-xl border text-left transition flex flex-col justify-between cursor-pointer ${
                     copilotTone === t.id
-                      ? "bg-purple-500/10 dark:bg-[#9fff00]/10 border-purple-500 dark:border-[#9fff00] text-[#1a1a1a] dark:text-zinc-100 shadow-sm"
+                      ? "bg-[#9fff00]/10 dark:bg-[#9fff00]/10 border-[#9fff00] dark:border-[#9fff00] text-[#1a1a1a] dark:text-zinc-100 shadow-sm"
                       : "bg-white dark:bg-zinc-800/80 border-black/[0.08] dark:border-white/[0.08] text-zinc-700 dark:text-zinc-300 hover:bg-black/[0.02] dark:hover:bg-zinc-800"
                   }`}
                 >
@@ -1702,7 +1824,7 @@ export default function Settings() {
                     </div>
                   </div>
                   <div className="mt-3">
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-purple-500/20 text-purple-600 dark:text-purple-300 font-mono">
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-[#9fff00]/20 text-[#1a1a1a] dark:text-[#9fff00] dark:text-[#9fff00] font-mono">
                       {t.badge}
                     </span>
                   </div>
@@ -1733,7 +1855,7 @@ export default function Settings() {
               max="98"
               value={keywordDensity}
               onChange={(e) => setKeywordDensity(Number(e.target.value))}
-              className="w-full accent-purple-600 dark:accent-[#9fff00] cursor-pointer"
+              className="w-full accent-[#9fff00] dark:accent-[#9fff00] cursor-pointer"
             />
             <div className="flex justify-between text-[10px] text-[#8e8e8e] dark:text-zinc-400 font-mono">
               <span>65% Natural Storytelling</span>
@@ -1747,32 +1869,52 @@ export default function Settings() {
             <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-2">
               Underlying LLM Engine
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {[
                 {
+                  id: "groq-llama-70b",
+                  name: "Groq (Llama 3.3 70B)",
+                  desc: "14,400 free req/day, 500 tok/sec LPU speed, no credit card.",
+                  badge: "100% Free Tier",
+                },
+                {
                   id: "gemini-pro",
-                  name: "Gemini 1.5 Pro / Flash",
+                  name: "Gemini 2.0 Flash / Pro",
                   desc: "Ultra-fast context matching with Deepmind resume fine-tuning.",
                 },
                 {
                   id: "gpt-4o",
-                  name: "Claude 3.5 / OpenAI GPT-4o",
+                  name: "Claude 3.5 / GPT-4o",
                   desc: "Standard reasoning model for bullet structuring.",
+                },
+                {
+                  id: "aion-3.5",
+                  name: "Aion Labs 3.5",
+                  desc: "High-throughput specialized reasoning model via OpenRouter.",
                 },
               ].map((m) => (
                 <button
                   key={m.id}
                   type="button"
                   onClick={() => setAiModel(m.id)}
-                  className={`p-3.5 rounded-xl border text-left transition cursor-pointer ${
+                  className={`p-3.5 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
                     aiModel === m.id
-                      ? "bg-purple-500/10 dark:bg-[#9fff00]/10 border-purple-500 dark:border-[#9fff00] text-[#1a1a1a] dark:text-zinc-100"
+                      ? "bg-[#9fff00]/10 dark:bg-[#9fff00]/10 border-[#9fff00] dark:border-[#9fff00] text-[#1a1a1a] dark:text-zinc-100"
                       : "bg-white dark:bg-zinc-800/80 border-black/[0.08] dark:border-white/[0.08] text-zinc-700 dark:text-zinc-300 hover:bg-black/[0.02] dark:hover:bg-zinc-800"
                   }`}
                 >
-                  <div className="text-xs font-bold">{m.name}</div>
-                  <div className="text-[11px] text-[#8e8e8e] dark:text-zinc-400 mt-0.5">
-                    {m.desc}
+                  <div>
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-xs font-bold">{m.name}</span>
+                      {m.badge && (
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#9fff00]/25 text-emerald-800 dark:text-[#9fff00] font-semibold shrink-0">
+                          {m.badge}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-[#8e8e8e] dark:text-zinc-400 mt-1">
+                      {m.desc}
+                    </div>
                   </div>
                 </button>
               ))}
@@ -1791,8 +1933,6 @@ export default function Settings() {
           </div>
         </div>
       )}
-
-
     </div>
   );
 }

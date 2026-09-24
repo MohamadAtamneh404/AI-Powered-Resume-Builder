@@ -1,7 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { ArrowLeft, Save, Download, Check, Loader2, Sparkles, Briefcase } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  ArrowLeft,
+  Save,
+  Download,
+  Check,
+  Loader2,
+  Sparkles,
+  Briefcase,
+  Undo2,
+  Redo2,
+  ChevronDown,
+  SlidersHorizontal,
+  ShieldCheck,
+} from "lucide-react";
 import Logo from "../../common/Logo";
-import ThemeToggle from "../../../Context/ThemeToggle";
 
 const timeAgo = (date) => {
   if (!date) return "";
@@ -34,9 +46,24 @@ const EditorTopBar = ({
   showAiAssistant = false,
   onBackToDashboard,
   onSyncCareerProfile,
+  canUndo = false,
+  canRedo = false,
+  onUndo,
+  onRedo,
 }) => {
-
   const [timeText, setTimeText] = useState(timeAgo(lastSavedAt));
+  const [isToolsOpen, setIsToolsOpen] = useState(false);
+  const toolsRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (toolsRef.current && !toolsRef.current.contains(e.target)) {
+        setIsToolsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -92,6 +119,30 @@ const EditorTopBar = ({
           />
           <div className="px-1.5">{renderSaveStatus()}</div>
         </div>
+
+        {/* Undo / Redo Controls */}
+        <div className="flex items-center gap-0.5 border-l border-black/[0.08] dark:border-white/[0.1] pl-2 ml-1">
+          <button
+            type="button"
+            onClick={onUndo}
+            disabled={!canUndo}
+            className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] disabled:opacity-30 disabled:pointer-events-none transition-colors"
+            title="Undo (Ctrl+Z)"
+            aria-label="Undo"
+          >
+            <Undo2 className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onRedo}
+            disabled={!canRedo}
+            className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] disabled:opacity-30 disabled:pointer-events-none transition-colors"
+            title="Redo (Ctrl+Y)"
+            aria-label="Redo"
+          >
+            <Redo2 className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Right */}
@@ -101,38 +152,86 @@ const EditorTopBar = ({
           onClick={onToggleAiAssistant}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors border ${
             showAiAssistant
-              ? "bg-purple-600 text-white border-purple-600 shadow-sm"
-              : "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800/60 hover:bg-purple-100 dark:hover:bg-purple-900/40"
+              ? "bg-[#9fff00] text-black border-[#9fff00] shadow-sm"
+              : "bg-zinc-100 dark:bg-[#9fff00]/10 text-[#1a1a1a] dark:text-[#9fff00] border-[#9fff00]/50 dark:border-[#9fff00]/60 hover:bg-zinc-200 dark:hover:bg-[#9fff00]/10"
           }`}
           title="Open AI Resume Assistant"
         >
-          <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+          <Sparkles className="w-3.5 h-3.5 text-[#9fff00]" />
           <span>AI Assistant</span>
         </button>
 
-        <button
-          onClick={onToggleAtsDrawer}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 rounded-full text-sm font-medium hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors border border-emerald-200 dark:border-emerald-800/60"
-        >
-          <span>ATS Score</span>
-          <span className="bg-emerald-600 text-white text-xs px-2 py-0.5 rounded-full font-bold">
-            {atsScore}
-          </span>
-        </button>
-
-        {onSyncCareerProfile && (
+        {/* Consolidated Diagnostics & Career Tools Dropdown */}
+        <div className="relative" ref={toolsRef}>
           <button
             type="button"
-            onClick={onSyncCareerProfile}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors border border-blue-200 dark:border-blue-800/60 cursor-pointer"
-            title="Sync profile details from your Master Career Baseline (CareerOps)"
+            onClick={() => setIsToolsOpen((prev) => !prev)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border border-black/[0.08] dark:border-white/[0.1] bg-black/[0.02] dark:bg-white/[0.04] hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-zinc-700 dark:text-zinc-200 cursor-pointer shadow-2xs"
+            title="Diagnostics & Profile Tools"
           >
-            <Briefcase className="w-3.5 h-3.5 text-blue-500" />
-            <span className="hidden sm:inline">Career Profile</span>
+            <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
+            <span className="hidden sm:inline">Tools</span>
+            <span className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-mono px-1.5 py-0.2 rounded-full font-bold">
+              {atsScore}%
+            </span>
+            <ChevronDown className="w-3 h-3 text-zinc-400" />
           </button>
-        )}
 
-        <ThemeToggle />
+          {isToolsOpen && (
+            <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-zinc-900 border border-black/[0.08] dark:border-white/[0.1] rounded-2xl shadow-xl z-50 p-1.5 space-y-1">
+              <button
+                type="button"
+                onClick={() => {
+                  onToggleAtsDrawer?.();
+                  setIsToolsOpen(false);
+                }}
+                className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition text-left cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                    <ShieldCheck className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                      ATS Diagnostics
+                    </div>
+                    <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                      Parser score & checks
+                    </div>
+                  </div>
+                </div>
+                <span className="bg-emerald-600 text-white text-[11px] px-2 py-0.5 rounded-full font-bold">
+                  {atsScore}%
+                </span>
+              </button>
+
+              {onSyncCareerProfile && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSyncCareerProfile?.();
+                    setIsToolsOpen(false);
+                  }}
+                  className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition text-left cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                      <Briefcase className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                        Career Baseline
+                      </div>
+                      <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                        Sync Master Profile
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              )}
+            </div>
+          )}
+        </div>
 
         <button
           onClick={onSave}

@@ -115,7 +115,7 @@ export default function Hero() {
                 <button
                   key={tag}
                   type="button"
-                  onClick={() => setQuery(tag)}
+                  onClick={() => navigate("/create-resume?prompt=" + encodeURIComponent(tag))}
                   className="text-xs text-[#1a1a1a] bg-white/70 hover:bg-white px-2.5 py-1 rounded-full border border-black/[0.05] transition-all hover:scale-105"
                 >
                   {tag}
@@ -123,8 +123,6 @@ export default function Hero() {
               ))}
             </div>
           </motion.div>
-
-
         </div>
       </div>
 
@@ -133,6 +131,7 @@ export default function Hero() {
       <div className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-20 hidden md:block">
         <button
           onClick={() => setLang(lang === "en" ? "pl" : "en")}
+          aria-label="Toggle language between Polish and English"
           className="bg-white/70 hover:bg-white/90 backdrop-blur-md border border-black/[0.08] px-3.5 py-1.5 rounded-full shadow-sm text-xs font-medium text-[#1a1a1a] tracking-wider transition-all duration-200 hover:scale-105 flex items-center gap-1.5"
         >
           <span

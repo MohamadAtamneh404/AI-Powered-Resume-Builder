@@ -1,3 +1,7 @@
+# Dependencies
+node_modules
+**/node_modules/
+
 # Logs
 logs
 *.log
@@ -7,20 +11,34 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
+# Production & Build outputs
 dist
 dist-ssr
-*.local
-.env
+build
 .vercel
 
-# Editor directories and files
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+*.env
+*.local
+
+# Editor & OS files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Tooling & Agent caches / artifacts
+.impeccable
+.playwright-cli
+coverage
+.cache
+

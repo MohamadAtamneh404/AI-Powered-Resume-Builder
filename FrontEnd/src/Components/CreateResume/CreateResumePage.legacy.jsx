@@ -269,7 +269,7 @@ function composeResumeJson(blocks, basics, template) {
       case "summary":
         resumeData.personalInfo.summary = block.content || "";
         break;
-      case "work":
+      case "work": {
         const experienceData = (block.entries || []).map((entry) => ({
           company: entry.company || "",
           title: entry.position || "",
@@ -292,6 +292,7 @@ function composeResumeJson(blocks, basics, template) {
           resumeData.experience = experienceData;
         }
         break;
+      }
       case "education":
         resumeData.education = (block.entries || []).map((entry) => ({
           institution: entry.institution || "",
@@ -325,7 +326,7 @@ function composeResumeJson(blocks, basics, template) {
           }))
           .filter((p) => p.name);
         break;
-      case "awards":
+      case "awards": {
         const awardsData = (block.entries || []).map((a) => ({
           title: a.title || "",
           date: a.date || "",
@@ -340,6 +341,7 @@ function composeResumeJson(blocks, basics, template) {
           issuer: a.awarder,
         }));
         break;
+      }
       case "volunteer":
         resumeData.volunteer = (block.entries || []).map((v) => ({
           organization: v.organization || "",
@@ -1633,7 +1635,7 @@ export default function CreateResumePage() {
         {/* Left: Brand + Editable Title + Autosave badge + ATS Score */}
         <div className="flex items-center gap-3 flex-wrap">
           <div className="flex items-center gap-2">
-            <span className="w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow text-sm">
+            <span className="w-8 h-8 rounded-lg bg-[#9fff00] text-[#1a1a1a] flex items-center justify-center font-bold text-white shadow text-sm">
               RA
             </span>
             <div className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-lg border border-white/10 transition group">
@@ -1722,7 +1724,7 @@ export default function CreateResumePage() {
                 type="button"
                 onClick={() => setActiveThemeColor(c)}
                 style={{ backgroundColor: c }}
-                className={`w-4 h-4 rounded-full border border-white/30 transition-transform ${activeThemeColor === c ? "scale-125 ring-2 ring-purple-400" : "hover:scale-110"}`}
+                className={`w-4 h-4 rounded-full border border-white/30 transition-transform ${activeThemeColor === c ? "scale-125 ring-2 ring-[#9fff00]" : "hover:scale-110"}`}
                 title={`Theme Color: ${c}`}
               />
             ))}
@@ -1761,14 +1763,14 @@ export default function CreateResumePage() {
             <button
               type="button"
               onClick={() => setMobileTab("edit")}
-              className={`px-3 py-1 rounded text-xs font-medium transition ${mobileTab === "edit" ? "bg-purple-600 text-white shadow" : "text-gray-300 hover:text-white"}`}
+              className={`px-3 py-1 rounded text-xs font-medium transition ${mobileTab === "edit" ? "bg-[#1a1a1a] dark:bg-[#9fff00] text-white shadow" : "text-gray-300 hover:text-white"}`}
             >
               ✏️ Edit
             </button>
             <button
               type="button"
               onClick={() => setMobileTab("preview")}
-              className={`px-3 py-1 rounded text-xs font-medium transition ${mobileTab === "preview" ? "bg-purple-600 text-white shadow" : "text-gray-300 hover:text-white"}`}
+              className={`px-3 py-1 rounded text-xs font-medium transition ${mobileTab === "preview" ? "bg-[#1a1a1a] dark:bg-[#9fff00] text-white shadow" : "text-gray-300 hover:text-white"}`}
             >
               👁️ Preview
             </button>
@@ -1786,7 +1788,7 @@ export default function CreateResumePage() {
           <button
             type="button"
             onClick={() => setShowTailorModal(true)}
-            className="hidden sm:flex items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-500/10 hover:bg-purple-500/20 px-3 py-1.5 text-xs font-medium text-purple-300 transition"
+            className="hidden sm:flex items-center gap-1.5 rounded-lg border border-[#9fff00]/40 bg-[#9fff00]/10 hover:bg-[#9fff00]/20 px-3 py-1.5 text-xs font-medium text-[#9fff00] transition"
           >
             <span>✨</span> Tailor to Job
           </button>
@@ -1905,7 +1907,7 @@ export default function CreateResumePage() {
                         setSelectedTemplateId(t.id || t._id);
                         applyTemplate(t.id || t._id);
                       }}
-                      className={`p-3 rounded-xl border cursor-pointer transition ${isSelected ? "border-purple-500 bg-purple-500/10" : "border-white/10 bg-white/5 hover:border-white/20"}`}
+                      className={`p-3 rounded-xl border cursor-pointer transition ${isSelected ? "border-[#9fff00] bg-[#9fff00]/10" : "border-white/10 bg-white/5 hover:border-white/20"}`}
                     >
                       <div className="flex justify-between items-center mb-1">
                         <span className="text-xs font-semibold text-white">
@@ -1973,7 +1975,7 @@ export default function CreateResumePage() {
                       key={font}
                       type="button"
                       onClick={() => setActiveFont(font)}
-                      className={`w-full text-left p-2.5 rounded-lg text-xs font-medium border transition ${activeFont === font ? "border-purple-500 bg-purple-500/10 text-white" : "border-white/10 text-gray-300 hover:bg-white/5"}`}
+                      className={`w-full text-left p-2.5 rounded-lg text-xs font-medium border transition ${activeFont === font ? "border-[#9fff00] bg-[#9fff00]/10 text-white" : "border-white/10 text-gray-300 hover:bg-white/5"}`}
                       style={{ fontFamily: font }}
                     >
                       {font}
@@ -2004,7 +2006,7 @@ export default function CreateResumePage() {
                           setRailDrawerOpen(false);
                         }}
                         disabled={BLOCK_CONFIG[type]?.singleton && exists}
-                        className="w-full text-left p-2.5 rounded-lg text-xs font-medium border border-white/10 text-gray-200 hover:bg-white/5 hover:border-purple-500/30 transition disabled:opacity-40 disabled:cursor-not-allowed flex justify-between items-center"
+                        className="w-full text-left p-2.5 rounded-lg text-xs font-medium border border-white/10 text-gray-200 hover:bg-white/5 hover:border-[#9fff00]/30 transition disabled:opacity-40 disabled:cursor-not-allowed flex justify-between items-center"
                       >
                         <span>{title}</span>
                         <span className="text-[#1a1a1a] font-bold">+</span>
@@ -2144,7 +2146,7 @@ export default function CreateResumePage() {
               <button
                 type="button"
                 onClick={() => toggleSectionCollapse("aiAssistant")}
-                className="text-xs text-purple-300 hover:text-purple-200"
+                className="text-xs text-[#9fff00] hover:text-[#9fff00]"
               >
                 {collapsedSections.aiAssistant ? "▼ Expand" : "▲ Collapse"}
               </button>
@@ -2163,7 +2165,7 @@ export default function CreateResumePage() {
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    className="rounded-lg bg-purple-600 hover:bg-purple-700 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-60 transition flex items-center gap-1.5"
+                    className="rounded-lg bg-[#1a1a1a] dark:bg-[#9fff00] hover:bg-[#1a1a1a] dark:bg-[#9fff00] px-3 py-1.5 text-xs font-medium text-white disabled:opacity-60 transition flex items-center gap-1.5"
                     onClick={onGenerateFull}
                     disabled={aiLoading}
                   >
@@ -2172,7 +2174,7 @@ export default function CreateResumePage() {
                   </button>
                   <button
                     type="button"
-                    className="rounded-lg border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 px-3 py-1.5 text-xs font-medium text-purple-200 disabled:opacity-60 transition flex items-center gap-1.5"
+                    className="rounded-lg border border-[#9fff00]/30 bg-[#9fff00]/10 hover:bg-[#9fff00]/20 px-3 py-1.5 text-xs font-medium text-[#9fff00] disabled:opacity-60 transition flex items-center gap-1.5"
                     onClick={onGenerateSummary}
                     disabled={aiLoading}
                   >
@@ -2201,7 +2203,7 @@ export default function CreateResumePage() {
                         <button
                           type="button"
                           onClick={() => setAiPopoverOpen((o) => !o)}
-                          className="flex items-center gap-1.5 text-xs text-purple-300 hover:text-purple-200 bg-purple-500/10 border border-purple-500/30 px-2.5 py-1 rounded-lg transition"
+                          className="flex items-center gap-1.5 text-xs text-[#9fff00] hover:text-[#9fff00] bg-[#9fff00]/10 border border-[#9fff00]/30 px-2.5 py-1 rounded-lg transition"
                         >
                           <span>✨</span> ATS Keyword Optimizer
                         </button>
@@ -2342,7 +2344,7 @@ export default function CreateResumePage() {
                                 </button>
                                 <button
                                   type="button"
-                                  className="text-xs underline text-purple-300 hover:text-purple-200"
+                                  className="text-xs underline text-[#9fff00] hover:text-[#9fff00]"
                                   onClick={() => onGenerateWorkBullets(i, ei)}
                                   title="AI: generate bullet points"
                                   disabled={aiLoading}
@@ -2384,7 +2386,7 @@ export default function CreateResumePage() {
                                   <button
                                     type="button"
                                     onClick={() => onGenerateWorkBullets(i, ei)}
-                                    className="p-1.5 rounded bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs flex-shrink-0 transition"
+                                    className="p-1.5 rounded bg-[#9fff00]/10 hover:bg-[#9fff00]/20 text-[#9fff00] border border-[#9fff00]/30 text-xs flex-shrink-0 transition"
                                     title="AI Rewrite"
                                   >
                                     ✨
@@ -3146,7 +3148,7 @@ export default function CreateResumePage() {
             <button
               type="button"
               onClick={() => setShowAddSectionMenu((o) => !o)}
-              className="w-full border-2 border-dashed border-white/20 hover:border-purple-500/50 hover:bg-purple-500/5 text-gray-300 hover:text-white py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 font-medium text-sm transition"
+              className="w-full border-2 border-dashed border-white/20 hover:border-[#9fff00]/50 hover:bg-[#9fff00]/5 text-gray-300 hover:text-white py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 font-medium text-sm transition"
             >
               <span className="text-base font-bold text-[#1a1a1a]">＋</span> Add
               Section
@@ -3323,7 +3325,7 @@ export default function CreateResumePage() {
                 Tailor to Job Description
               </h2>
               <textarea
-                className="w-full h-32 rounded-xl border border-black/[0.06] bg-[#EDEEF5]/40 p-3 text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full h-32 rounded-xl border border-black/[0.06] bg-[#EDEEF5]/40 p-3 text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#9fff00]"
                 placeholder="Paste the job description here..."
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
@@ -3386,7 +3388,7 @@ export default function CreateResumePage() {
                     type="button"
                     onClick={handleTailor}
                     disabled={tailorLoading}
-                    className="rounded-lg bg-purple-600 px-4 py-2 text-sm text-white hover:bg-purple-700 disabled:opacity-50"
+                    className="rounded-lg bg-[#1a1a1a] dark:bg-[#9fff00] px-4 py-2 text-sm text-white hover:bg-[#1a1a1a] dark:bg-[#9fff00] disabled:opacity-50"
                   >
                     Analyze & Tailor
                   </button>

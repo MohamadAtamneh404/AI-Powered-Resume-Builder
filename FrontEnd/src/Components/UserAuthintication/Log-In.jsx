@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../services/firebase";
 import { UserContext } from "../../Context/UserContext";
@@ -42,9 +43,17 @@ export default function LoginPage() {
     try {
       if (email && password) {
         await signInWithEmailAndPassword(auth, email, password);
+        navigate("/Dashboard");
+        setLoading(false);
+        return;
       }
-    } catch {
-      // In preview demo mode, proceed to dashboard
+    } catch (err) {
+      const msg = err.code === "auth/invalid-credential" || err.code === "auth/wrong-password"
+        ? "Invalid email or password. Please try again."
+        : (err.message || "Failed to sign in. Please check your credentials.");
+      setError(msg);
+      setLoading(false);
+      return;
     }
     if (loginAsDemo) {
       loginAsDemo();
@@ -55,20 +64,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-bg-base selection:bg-brand-green selection:text-black flex items-center justify-center relative overflow-hidden font-sans text-zinc-900">
-      {/* Animated Background Gradients */}
-      <div className="absolute inset-0 pointer-events-none">
-        <motion.div
-          animate={{ x: [0, 100, 0], y: [0, -50, 0] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-[10%] left-[20%] w-[400px] h-[400px] bg-purple-600/20 rounded-full blur-[100px]"
-        />
-        <motion.div
-          animate={{ x: [0, -100, 0], y: [0, 50, 0] }}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-[10%] right-[20%] w-[350px] h-[350px] bg-indigo-600/20 rounded-full blur-[100px]"
-        />
-      </div>
-
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -192,10 +187,10 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full relative group py-3.5 mt-2 rounded-xl bg-white text-black font-semibold flex justify-center items-center overflow-hidden transition-all hover:bg-slate-200 active:scale-[0.98]"
+              className="w-full relative group py-3.5 mt-2 rounded-xl bg-[#1a1a1a] hover:bg-black text-white dark:bg-[#9fff00] dark:hover:bg-[#8fee00] dark:text-black font-semibold flex justify-center items-center overflow-hidden transition-all shadow-md active:scale-[0.98] cursor-pointer disabled:opacity-50"
             >
               {loading ? (
-                <Loader2 className="animate-spin text-slate-600" size={20} />
+                <Loader2 className="animate-spin text-white dark:text-black" size={20} />
               ) : (
                 <span className="flex items-center gap-2">
                   Sign In{" "}
@@ -212,7 +207,7 @@ export default function LoginPage() {
             Don't have an account?{" "}
             <Link
               to="/register"
-              className="text-[#1a1a1a]  hover:text-purple-400 transition-colors"
+              className="text-[#1a1a1a] font-semibold hover:underline decoration-[#9fff00] decoration-2 underline-offset-4 transition-all"
             >
               Sign Up
             </Link>

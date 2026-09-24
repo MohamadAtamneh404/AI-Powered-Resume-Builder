@@ -88,7 +88,11 @@ export default function ResumeExamples({ onTemplateSelect }) {
         ...tpl,
         category: "Professional",
         passRate: 100,
-        tags: ["100% ATS Single-Column", "Workday Tested", "Greenhouse Verified"],
+        tags: [
+          "100% ATS Single-Column",
+          "Workday Tested",
+          "Greenhouse Verified",
+        ],
       };
     }
     return {
@@ -183,7 +187,7 @@ export default function ResumeExamples({ onTemplateSelect }) {
         </div>
 
         <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-black/[0.06] dark:border-white/[0.08] shadow-sm flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-lg font-bold">
+          <div className="w-10 h-10 rounded-xl bg-[#9fff00]/10 border border-[#9fff00]/20 flex items-center justify-center text-[#9fff00] text-lg font-bold">
             99.4%
           </div>
           <div>
@@ -225,7 +229,7 @@ export default function ResumeExamples({ onTemplateSelect }) {
       {/* Loading Spinner */}
       {loading ? (
         <div className="py-24 flex flex-col items-center justify-center text-[#8e8e8e] dark:text-zinc-400 gap-3">
-          <div className="w-8 h-8 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
+          <div className="w-8 h-8 rounded-full border-2 border-[#9fff00] border-t-transparent animate-spin" />
           <span className="text-xs">Loading verified templates...</span>
         </div>
       ) : filteredTemplates.length === 0 ? (
@@ -274,10 +278,10 @@ export default function ResumeExamples({ onTemplateSelect }) {
                   <div className="h-2 w-20 bg-slate-200 rounded-xs" />
                   <div className="h-1 w-28 bg-slate-400 rounded-xs" />
                   <div className="border-t border-slate-200 my-1" />
-                  <div className="h-1.5 w-16 bg-purple-700 rounded-xs" />
+                  <div className="h-1.5 w-16 bg-[#1a1a1a] dark:bg-[#9fff00] rounded-xs" />
                   <div className="h-1 w-full bg-slate-300 rounded-xs" />
                   <div className="h-1 w-5/6 bg-slate-300 rounded-xs" />
-                  <div className="h-1.5 w-16 bg-purple-700 rounded-xs mt-1.5" />
+                  <div className="h-1.5 w-16 bg-[#1a1a1a] dark:bg-[#9fff00] rounded-xs mt-1.5" />
                   <div className="h-1 w-full bg-slate-300 rounded-xs" />
                   <div className="h-1 w-4/5 bg-slate-300 rounded-xs" />
                 </div>
@@ -300,7 +304,7 @@ export default function ResumeExamples({ onTemplateSelect }) {
               {/* Card Meta Content */}
               <div className="p-5 flex flex-col flex-grow justify-between gap-4">
                 <div>
-                  <h3 className="font-['Outfit'] text-base font-bold text-[#1a1a1a] dark:text-zinc-100 group-hover:text-purple-600 dark:group-hover:text-[#9fff00] transition-colors">
+                  <h3 className="font-['Outfit'] text-base font-bold text-[#1a1a1a] dark:text-zinc-100 group-hover:text-[#9fff00] dark:group-hover:text-[#9fff00] transition-colors">
                     {tpl.name}
                   </h3>
                   <p className="mt-1 text-xs text-[#8e8e8e] dark:text-zinc-400 line-clamp-2 leading-relaxed">
@@ -321,7 +325,7 @@ export default function ResumeExamples({ onTemplateSelect }) {
                   <button
                     type="button"
                     onClick={() => handleUseTemplate(tpl)}
-                    className="px-3 py-2 rounded-xl text-xs font-semibold text-white dark:text-black bg-purple-600 dark:bg-[#9fff00] hover:bg-purple-500 dark:hover:bg-[#8fee00] shadow-md shadow-purple-600/20 transition flex items-center justify-center gap-1 cursor-pointer"
+                    className="px-3 py-2 rounded-xl text-xs font-semibold text-white dark:text-black bg-[#1a1a1a] dark:bg-[#9fff00] dark:bg-[#9fff00] hover:bg-[#1a1a1a] dark:bg-[#9fff00] dark:hover:bg-[#8fee00] shadow-md shadow-[#9fff00]/20 transition flex items-center justify-center gap-1 cursor-pointer"
                   >
                     <span>Use Template</span>
                     <span>→</span>
@@ -369,7 +373,7 @@ export default function ResumeExamples({ onTemplateSelect }) {
 
               {/* JSON Parse Tree */}
               <div className="p-4 rounded-xl bg-[#EDEEF5] dark:bg-zinc-950 border border-black/[0.06] dark:border-white/[0.08] text-zinc-700 dark:text-zinc-300 space-y-2">
-                <div className="text-purple-500 dark:text-purple-400 font-bold">
+                <div className="text-[#9fff00] dark:text-[#9fff00] font-bold">
                   // Parsed Node Tree Output
                 </div>
                 <div>{"{"}</div>
@@ -388,14 +392,20 @@ export default function ResumeExamples({ onTemplateSelect }) {
                 <div className="pl-8 text-[#8e8e8e] dark:text-zinc-400">
                   "linkedin": "Detected (Clean URL)"
                 </div>
-                <div className="pl-4 text-cyan-500 dark:text-cyan-300">{"},"}</div>
-                <div className="pl-4 text-cyan-500 dark:text-cyan-300">"work_experience": [</div>
+                <div className="pl-4 text-cyan-500 dark:text-cyan-300">
+                  {"},"}
+                </div>
+                <div className="pl-4 text-cyan-500 dark:text-cyan-300">
+                  "work_experience": [
+                </div>
                 <div className="pl-8 text-[#8e8e8e] dark:text-zinc-400">
                   {"{"} "company": "Detected", "role": "Senior Engineer",
                   "dates": "2021-Present", "metrics_extracted": 4 {"}"}
                 </div>
                 <div className="pl-4 text-cyan-500 dark:text-cyan-300">],</div>
-                <div className="pl-4 text-cyan-500 dark:text-cyan-300">"skills_extracted": [</div>
+                <div className="pl-4 text-cyan-500 dark:text-cyan-300">
+                  "skills_extracted": [
+                </div>
                 <div className="pl-8 text-emerald-600 dark:text-emerald-400">
                   "TypeScript", "React", "Node.js", "Docker", "AWS", "GraphQL",
                   "CI/CD"
@@ -428,7 +438,7 @@ export default function ResumeExamples({ onTemplateSelect }) {
                   setSelectedParseTemplate(null);
                   handleUseTemplate(tpl);
                 }}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-white dark:text-black bg-purple-600 dark:bg-[#9fff00] hover:bg-purple-500 dark:hover:bg-[#8fee00] shadow-md transition cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-white dark:text-black bg-[#1a1a1a] dark:bg-[#9fff00] dark:bg-[#9fff00] hover:bg-[#1a1a1a] dark:bg-[#9fff00] dark:hover:bg-[#8fee00] shadow-md transition cursor-pointer"
               >
                 Use This Template Now
               </button>

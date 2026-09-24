@@ -82,41 +82,43 @@ export default function Home() {
       </main>
 
       {/* Architectural Edge Footer */}
-      <footer className="py-12 px-6 md:px-12 border-t border-black/[0.06] bg-[#EDEEF5]">
+      <footer className="py-12 px-6 md:px-12 border-t border-black/[0.06] bg-[#EDEEF5] dark:bg-[#0f0f12] dark:border-white/[0.08] transition-colors">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-[#8e8e8e]">
           <div className="flex items-center gap-2">
-            <span className="font-['Outfit'] font-bold text-[#1a1a1a] text-sm lowercase">
-              mėntality
-              <span className="text-[#8e8e8e] font-normal"> · resu.ai</span>
+            <span className="font-['Outfit'] font-bold text-[#1a1a1a] dark:text-white text-sm lowercase">
+              resu<span className="text-[#8e8e8e] font-normal">·ai</span>
             </span>
             <span>—</span>
             <span>architectural editorial intelligence</span>
           </div>
           <div className="flex items-center gap-6 lowercase">
             <a
-              href="#service"
-              className="hover:text-[#1a1a1a] transition-colors"
+              href="#templates"
+              className="hover:text-[#1a1a1a] dark:hover:text-white transition-colors"
             >
-              service
+              templates
             </a>
             <a
-              href="#resources"
-              className="hover:text-[#1a1a1a] transition-colors"
+              href="/resume-examples"
+              className="hover:text-[#1a1a1a] dark:hover:text-white transition-colors"
             >
-              patient resources
-            </a>
-            <a href="#about" className="hover:text-[#1a1a1a] transition-colors">
-              about us
+              examples
             </a>
             <a
-              href="#education"
-              className="hover:text-[#1a1a1a] transition-colors"
+              href="/create-resume"
+              className="hover:text-[#1a1a1a] dark:hover:text-white transition-colors"
             >
-              education center
+              builder
+            </a>
+            <a
+              href="/JobTracker"
+              className="hover:text-[#1a1a1a] dark:hover:text-white transition-colors"
+            >
+              job tracker
             </a>
           </div>
           <div className="text-right font-mono">
-            <span>2024</span>
+            <span>© 2026 resu·ai</span>
           </div>
         </div>
       </footer>

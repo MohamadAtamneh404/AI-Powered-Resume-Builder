@@ -28,7 +28,10 @@ export default [
         "warn",
         { allowConstantExport: true },
       ],
-      "no-unused-vars": ["error", { varsIgnorePattern: "^[A-Z_]" }],
+      "no-unused-vars": [
+        "warn",
+        { varsIgnorePattern: "^[A-Z_]|motion", argsIgnorePattern: "^_" },
+      ],
     },
   },
   prettierRecommended,

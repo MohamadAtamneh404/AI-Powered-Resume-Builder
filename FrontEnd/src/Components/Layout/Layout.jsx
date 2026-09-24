@@ -119,7 +119,44 @@ export default function Layout({ children }) {
           {children}
         </main>
       ) : (
-        <main className="max-w-7xl mx-auto px-4 sm:px-8 py-6">{children}</main>
+        <main className="max-w-7xl mx-auto px-4 sm:px-8 py-6 pb-24 md:pb-6">
+          {children}
+        </main>
+      )}
+
+      {/* Mobile Bottom Navigation Bar (Casey's Thumb Zone) */}
+      {!isEditor && (
+        <nav
+          aria-label="Mobile navigation"
+          className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#0f0f12]/95 backdrop-blur-md border-t border-black/[0.08] dark:border-white/[0.08] flex md:hidden items-center justify-around py-2 px-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-lg transition-colors"
+        >
+          {navItems.map((item) => {
+            const active =
+              location.pathname.toLowerCase() === item.href.toLowerCase();
+            return (
+              <Link
+                key={item.href}
+                to={item.href}
+                className={`flex flex-col items-center justify-center gap-1 py-1 px-2.5 rounded-xl min-w-[54px] text-[10px] font-medium transition-colors ${
+                  active
+                    ? "text-[#1a1a1a] dark:text-white font-semibold"
+                    : "text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                }`}
+              >
+                <div
+                  className={`p-1 rounded-lg transition-colors ${
+                    active
+                      ? "bg-black/[0.06] dark:bg-white/[0.1] text-brand-green-dark dark:text-brand-green"
+                      : ""
+                  }`}
+                >
+                  {item.icon}
+                </div>
+                <span className="truncate">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
       )}
     </div>
   );
@@ -222,8 +259,11 @@ function UserDropdown() {
               }}
               className="w-full text-left px-4 py-2 text-xs text-[#1a1a1a] dark:text-zinc-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] flex items-center gap-2 transition-colors"
             >
-              <LayoutDashboard size={14} className="text-[#8e8e8e] dark:text-zinc-400" />
-              <span>Career Command Center</span>
+              <LayoutDashboard
+                size={14}
+                className="text-[#8e8e8e] dark:text-zinc-400"
+              />
+              <span>Dashboard</span>
             </button>
             <button
               onClick={() => {
@@ -232,8 +272,11 @@ function UserDropdown() {
               }}
               className="w-full text-left px-4 py-2 text-xs text-[#1a1a1a] dark:text-zinc-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] flex items-center gap-2 transition-colors"
             >
-              <SettingsIcon size={14} className="text-[#8e8e8e] dark:text-zinc-400" />
-              <span>ATS & Account Settings</span>
+              <SettingsIcon
+                size={14}
+                className="text-[#8e8e8e] dark:text-zinc-400"
+              />
+              <span>Settings</span>
             </button>
           </div>
 

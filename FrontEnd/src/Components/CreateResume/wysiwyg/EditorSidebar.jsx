@@ -115,11 +115,8 @@ export default function EditorSidebar({
   onThemeColorChange,
   zoomLevel,
   onZoomChange,
-  onGenerateFull,
-  onGenerateSummary,
-  aiLoading,
-  aiPrompt,
-  onAiPromptChange,
+  showAiAssistant = false,
+  onToggleAiAssistant,
 }) {
   const tabs = [
     { id: "sections", icon: LayoutGrid, label: "Sections" },
@@ -136,19 +133,30 @@ export default function EditorSidebar({
       <div className="w-14 h-full bg-white dark:bg-[#0f0f12] border-r border-black/[0.06] dark:border-white/[0.08] flex flex-col items-center py-4 gap-4 z-20 relative transition-colors">
         {tabs.map((tab) => {
           const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
+          const isActive = tab.id === "ai" ? showAiAssistant : activeTab === tab.id;
           return (
             <button
               key={tab.id}
-              onClick={() => onTabChange(isActive ? null : tab.id)}
+              data-tab={tab.id}
+              aria-label={tab.label}
+              onClick={() => {
+                if (tab.id === "ai") {
+                  onToggleAiAssistant?.();
+                } else {
+                  onTabChange(isActive ? null : tab.id);
+                }
+              }}
               className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
                 isActive
-                  ? "bg-[#9fff00]/10 dark:bg-[#9fff00]/20 text-[#1a1a1a] dark:text-[#9fff00]"
+                  ? "bg-[#9fff00]/15 dark:bg-[#9fff00]/25 text-[#1a1a1a] dark:text-[#9fff00] ring-1 ring-[#9fff00]/40"
                   : "text-[#8e8e8e] dark:text-zinc-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] hover:text-[#1a1a1a] dark:hover:text-zinc-100"
               }`}
               title={tab.label}
             >
-              <Icon size={20} className={isActive ? "text-[#1a1a1a] dark:text-[#9fff00]" : ""} />
+              <Icon
+                size={20}
+                className={isActive ? "text-[#1a1a1a] dark:text-[#9fff00]" : ""}
+              />
             </button>
           );
         })}
@@ -301,24 +309,24 @@ export default function EditorSidebar({
                             : "border-black/[0.06] dark:border-white/[0.08] hover:border-black/[0.12] dark:hover:border-white/[0.18] bg-white dark:bg-zinc-900 hover:shadow-sm"
                         }`}
                       >
-                      <div className="w-full aspect-[1/1.4] bg-white rounded-md mb-2 flex flex-col overflow-hidden border border-black/[0.04] dark:border-white/[0.06]">
-                        {/* Fake template preview */}
-                        <div className="h-4 bg-black/[0.04] w-full" />
-                        <div className="flex-1 flex p-1 gap-1">
-                          <div className="w-1/3 bg-black/[0.03] rounded-sm" />
-                          <div className="w-2/3 flex flex-col gap-1">
-                            <div className="h-1.5 w-full bg-black/[0.06] rounded-sm" />
-                            <div className="h-1.5 w-3/4 bg-black/[0.06] rounded-sm" />
-                            <div className="h-1.5 w-5/6 bg-black/[0.06] rounded-sm" />
+                        <div className="w-full aspect-[1/1.4] bg-white rounded-md mb-2 flex flex-col overflow-hidden border border-black/[0.04] dark:border-white/[0.06]">
+                          {/* Fake template preview */}
+                          <div className="h-4 bg-black/[0.04] w-full" />
+                          <div className="flex-1 flex p-1 gap-1">
+                            <div className="w-1/3 bg-black/[0.03] rounded-sm" />
+                            <div className="w-2/3 flex flex-col gap-1">
+                              <div className="h-1.5 w-full bg-black/[0.06] rounded-sm" />
+                              <div className="h-1.5 w-3/4 bg-black/[0.06] rounded-sm" />
+                              <div className="h-1.5 w-5/6 bg-black/[0.06] rounded-sm" />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <span className="text-xs font-semibold text-[#1a1a1a] dark:text-zinc-100 truncate w-full">
-                        {tmpl.name}
-                      </span>
-                      <span className="text-[10px] text-[#8e8e8e] dark:text-zinc-400 truncate w-full">
-                        {tmpl.category}
-                      </span>
+                        <span className="text-xs font-semibold text-[#1a1a1a] dark:text-zinc-100 truncate w-full">
+                          {tmpl.name}
+                        </span>
+                        <span className="text-[10px] text-[#8e8e8e] dark:text-zinc-400 truncate w-full">
+                          {tmpl.category}
+                        </span>
                       </button>
                     );
                   })}
@@ -327,47 +335,6 @@ export default function EditorSidebar({
                       No templates available
                     </div>
                   )}
-                </div>
-              )}
-
-              {/* AI */}
-              {activeTab === "ai" && (
-                <div className="flex flex-col gap-4 h-full">
-                  <div className="flex flex-col gap-3">
-                    <label className="text-sm font-semibold text-[#1a1a1a] dark:text-zinc-100">
-                      Instructions
-                    </label>
-                    <textarea
-                      value={aiPrompt || ""}
-                      onChange={(e) =>
-                        onAiPromptChange && onAiPromptChange(e.target.value)
-                      }
-                      placeholder="E.g., Make my summary sound more professional and focus on my leadership skills..."
-                      className="w-full h-32 p-3 text-sm text-[#1a1a1a] dark:text-zinc-100 bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#9fff00] focus:border-transparent resize-none transition-all placeholder:text-[#8e8e8e] dark:placeholder:text-zinc-500"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-2 mt-4">
-                    <button
-                      onClick={onGenerateFull}
-                      disabled={aiLoading}
-                      className="w-full py-3 px-4 bg-[#9fff00] hover:bg-[#8cee00] text-[#1a1a1a] font-medium rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {aiLoading ? (
-                        <span className="animate-spin w-4 h-4 border-2 border-black/20 border-t-black rounded-full" />
-                      ) : (
-                        <Sparkles size={16} />
-                      )}
-                      Generate Full Resume
-                    </button>
-                    <button
-                      onClick={onGenerateSummary}
-                      disabled={aiLoading}
-                      className="w-full py-3 px-4 bg-white dark:bg-zinc-900 border border-black/[0.06] dark:border-white/[0.1] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] text-[#1a1a1a] dark:text-zinc-100 font-medium rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Improve Summary
-                    </button>
-                  </div>
                 </div>
               )}
             </div>

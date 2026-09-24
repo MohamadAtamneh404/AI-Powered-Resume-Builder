@@ -47,7 +47,7 @@ export default function JobTracker() {
   const Spinner = () => (
     <div className="flex justify-center items-center py-12">
       <svg
-        className="animate-spin h-8 w-8 text-purple-500"
+        className="animate-spin h-8 w-8 text-[#9fff00]"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
@@ -257,7 +257,9 @@ export default function JobTracker() {
   const releaseBlur = (e) => {
     try {
       e.currentTarget && e.currentTarget.blur && e.currentTarget.blur();
-    } catch {}
+    } catch {
+      // Ignore blur failure on unmounted elements
+    }
   };
 
   // Export to Excel
@@ -333,7 +335,9 @@ export default function JobTracker() {
                 onKeyDown={handleEditKeyDown}
               />
             ) : (
-              <span className="font-medium text-[#1a1a1a] dark:text-zinc-100">{job.position}</span>
+              <span className="font-medium text-[#1a1a1a] dark:text-zinc-100">
+                {job.position}
+              </span>
             )}
           </td>
         );
@@ -364,7 +368,7 @@ export default function JobTracker() {
         return (
           <td className="px-4 py-3">
             <select
-              className="px-2 py-1 bg-gray-900/60 border border-white/10 rounded-full text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="px-2.5 py-1 bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 rounded-full text-zinc-900 dark:text-zinc-100 text-xs focus:outline-none focus:ring-2 focus:ring-[#9fff00] shadow-2xs"
               value={job.status}
               onChange={(e) =>
                 updateJobField(job._id, "status", e.target.value)
@@ -395,7 +399,7 @@ export default function JobTracker() {
               <input
                 type="date"
                 autoFocus
-                className="px-2 py-1 bg-gray-900/60 border border-white/10 rounded-lg text-white outline-none focus:ring-2 focus:ring-purple-500"
+                className="px-2 py-1 bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 rounded-lg text-zinc-900 dark:text-zinc-100 outline-none focus:ring-2 focus:ring-[#9fff00] text-xs shadow-2xs"
                 value={editingValue}
                 onChange={(e) => setEditingValue(e.target.value)}
                 onBlur={commitEdit}
@@ -432,7 +436,7 @@ export default function JobTracker() {
                 href={job.jobLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-purple-300 hover:text-purple-200 underline text-sm"
+                className="text-[#9fff00] hover:text-[#9fff00] underline text-sm"
               >
                 Open
               </a>
@@ -458,7 +462,9 @@ export default function JobTracker() {
                 onKeyDown={handleEditKeyDown}
               />
             ) : (
-              <span className="text-zinc-700 dark:text-zinc-300">{job.location || "-"}</span>
+              <span className="text-zinc-700 dark:text-zinc-300">
+                {job.location || "-"}
+              </span>
             )}
           </td>
         );
@@ -479,7 +485,9 @@ export default function JobTracker() {
                 onKeyDown={handleEditKeyDown}
               />
             ) : (
-              <span className="text-zinc-700 dark:text-zinc-300">{job.salary || "-"}</span>
+              <span className="text-zinc-700 dark:text-zinc-300">
+                {job.salary || "-"}
+              </span>
             )}
           </td>
         );
@@ -559,7 +567,7 @@ export default function JobTracker() {
               onMouseUp={releaseBlur}
               onMouseLeave={releaseBlur}
               onTouchEnd={releaseBlur}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-purple-300 border border-purple-500/40 bg-purple-500/10 hover:bg-purple-500/20 shadow"
+              className="px-4 py-2 rounded-lg text-sm font-medium text-[#9fff00] border border-[#9fff00]/40 bg-[#9fff00]/10 hover:bg-[#9fff00]/20 shadow"
             >
               ⬇️ Export
             </button>
@@ -568,7 +576,7 @@ export default function JobTracker() {
               onMouseUp={releaseBlur}
               onMouseLeave={releaseBlur}
               onTouchEnd={releaseBlur}
-              className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow"
+              className="px-4 py-2 rounded-lg text-sm font-semibold text-[#1a1a1a] bg-[#9fff00] hover:bg-[#8fee00] shadow"
             >
               ➕ New Job
             </button>
@@ -594,7 +602,7 @@ export default function JobTracker() {
           icon="📁"
           label="Jobs added (7d)"
           value={stats.jobsAdded}
-          accent="bg-purple-500/20"
+          accent="bg-[#9fff00]/20"
         />
         <StatCard
           icon="📈"
@@ -607,22 +615,22 @@ export default function JobTracker() {
           onMouseUp={releaseBlur}
           onMouseLeave={releaseBlur}
           onTouchEnd={releaseBlur}
-          className={`text-left ${showArchived ? "ring-2 ring-purple-500/50" : ""} rounded-xl`}
+          className={`text-left ${showArchived ? "ring-2 ring-[#9fff00]" : ""} rounded-2xl transition`}
         >
-          <div className="flex items-center gap-3 p-4 rounded-xl border border-white/10 bg-gray-900/60 backdrop-blur shadow-lg hover:shadow-xl transition">
-            <div className="h-10 w-10 grid place-items-center rounded-lg bg-blue-500/20 text-white/90">
+          <div className="flex items-center gap-3.5 p-5 rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-zinc-900 shadow-sm hover:shadow-md transition">
+            <div className="h-10 w-10 grid place-items-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
               🗂️
             </div>
             <div>
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-[#8e8e8e] dark:text-zinc-400 font-mono uppercase tracking-wider">
                 {showArchived ? "Viewing" : "Switch to"} Archived
               </div>
-              <div className="text-sm text-gray-300">
-                <span className="text-white font-semibold">
+              <div className="text-sm text-zinc-600 dark:text-zinc-300">
+                <span className="text-[#1a1a1a] dark:text-zinc-100 font-bold">
                   {archivedCount}
                 </span>{" "}
                 archived •{" "}
-                <span className="text-white font-semibold">{activeCount}</span>{" "}
+                <span className="text-[#1a1a1a] dark:text-zinc-100 font-bold">{activeCount}</span>{" "}
                 active
               </div>
             </div>
@@ -638,10 +646,10 @@ export default function JobTracker() {
             placeholder="Search positions or companies..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-3 py-3 rounded-xl bg-gray-900/60 border border-white/10 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-500 shadow"
+            className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-black/[0.08] dark:border-white/10 text-zinc-900 dark:text-white placeholder:text-zinc-400 outline-none focus:ring-2 focus:ring-[#9fff00] shadow-xs text-sm"
           />
           <svg
-            className="absolute left-3 top-3.5 h-5 w-5 text-gray-500"
+            className="absolute left-3 top-3 h-5 w-5 text-zinc-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -655,11 +663,11 @@ export default function JobTracker() {
           </svg>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-300">Status</span>
+          <span className="text-xs font-mono uppercase tracking-wider text-zinc-600 dark:text-zinc-400">Status</span>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-gray-900/60 border border-white/10 text-white outline-none focus:ring-2 focus:ring-purple-500"
+            className="px-3 py-2 rounded-xl bg-white dark:bg-zinc-900 border border-black/[0.08] dark:border-white/10 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-[#9fff00] text-sm shadow-xs"
           >
             <option value="All">All</option>
             <option value="Applied">Applied</option>
@@ -675,7 +683,7 @@ export default function JobTracker() {
             onMouseUp={releaseBlur}
             onMouseLeave={releaseBlur}
             onTouchEnd={releaseBlur}
-            className="px-4 py-2 rounded-lg bg-gray-900/60 border border-white/10 text-gray-300 hover:bg-gray-900/80 shadow"
+            className="px-4 py-2 rounded-xl bg-white dark:bg-zinc-900 border border-black/[0.08] dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 shadow-xs text-sm cursor-pointer transition"
           >
             ⚙️ Columns
           </button>
@@ -683,12 +691,12 @@ export default function JobTracker() {
       </div>
 
       {/* Jobs Table */}
-      <div className="rounded-xl border border-white/10 bg-gray-900/40 backdrop-blur shadow-xl overflow-hidden">
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-zinc-900 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-white/5 sticky top-0 backdrop-blur z-10">
+            <thead className="bg-zinc-50/80 dark:bg-white/[0.03] border-b border-black/[0.06] dark:border-white/[0.08] sticky top-0 backdrop-blur z-10">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-300 tracking-wider w-12">
+                <th className="px-4 py-3 text-left text-[11px] font-mono uppercase tracking-wider text-zinc-600 dark:text-zinc-400 w-12">
                   <input
                     type="checkbox"
                     checked={
@@ -696,23 +704,23 @@ export default function JobTracker() {
                       filteredJobs.length > 0
                     }
                     onChange={toggleSelectAll}
-                    className="rounded bg-gray-800 border-gray-600 text-purple-500"
+                    className="rounded bg-gray-800 border-gray-600 text-[#9fff00]"
                   />
                 </th>
                 {columnsToRender.map((col) => (
                   <th
                     key={col.key}
-                    className="px-4 py-3 text-left text-xs font-semibold text-gray-300 tracking-wider"
+                    className="px-4 py-3 text-left text-[11px] font-mono uppercase tracking-wider text-zinc-600 dark:text-zinc-400"
                   >
                     {col.label}
                   </th>
                 ))}
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-300 tracking-wider w-40">
+                <th className="px-4 py-3 text-left text-[11px] font-mono uppercase tracking-wider text-zinc-600 dark:text-zinc-400 w-40">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
               {filteredJobs.length === 0 ? (
                 <tr>
                   <td
@@ -721,10 +729,10 @@ export default function JobTracker() {
                   >
                     <div className="mx-auto max-w-md">
                       <div className="text-4xl mb-3">🗂️</div>
-                      <h3 className="text-lg font-semibold text-white">
+                      <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
                         No job applications found
                       </h3>
-                      <p className="mt-1 text-sm text-gray-400">
+                      <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
                         Try adjusting your filters or add a new job to get
                         started.
                       </p>
@@ -734,13 +742,13 @@ export default function JobTracker() {
                             setFilterStatus("All");
                             setSearch("");
                           }}
-                          className="px-4 py-2 rounded-lg text-sm text-gray-200 bg-gray-800/80 border border-white/10 hover:bg-gray-700"
+                          className="px-4 py-2 rounded-xl text-sm font-medium text-zinc-700 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800 border border-black/10 dark:border-white/10 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition cursor-pointer"
                         >
                           Clear filters
                         </button>
                         <button
                           onClick={() => setShowAddForm(true)}
-                          className="px-4 py-2 rounded-lg text-sm text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500"
+                          className="px-4 py-2 rounded-xl text-sm font-semibold text-[#1a1a1a] bg-[#9fff00] hover:bg-[#8fee00] transition cursor-pointer shadow-xs"
                         >
                           Add Job
                         </button>
@@ -752,14 +760,14 @@ export default function JobTracker() {
                 filteredJobs.map((job) => (
                   <tr
                     key={job._id}
-                    className="odd:bg-white/0 even:bg-white/[0.02] hover:bg-white/[0.06] transition"
+                    className="odd:bg-transparent even:bg-black/[0.01] dark:even:bg-white/[0.01] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition"
                   >
                     <td className="px-4 py-3">
                       <input
                         type="checkbox"
                         checked={selectedJobs.includes(job._id)}
                         onChange={() => toggleJobSelection(job._id)}
-                        className="rounded bg-gray-800 border-gray-600 text-purple-500"
+                        className="rounded bg-gray-800 border-gray-600 text-[#9fff00]"
                       />
                     </td>
 
@@ -778,7 +786,7 @@ export default function JobTracker() {
                               onMouseUp={releaseBlur}
                               onMouseLeave={releaseBlur}
                               onTouchEnd={releaseBlur}
-                              className="px-3 py-1.5 rounded-lg text-sm text-green-300 border border-green-500/30 bg-green-500/10 hover:bg-green-500/20"
+                              className="px-2.5 py-1 rounded-lg text-xs font-medium text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20 transition cursor-pointer"
                             >
                               Restore
                             </button>
@@ -787,7 +795,7 @@ export default function JobTracker() {
                               onMouseUp={releaseBlur}
                               onMouseLeave={releaseBlur}
                               onTouchEnd={releaseBlur}
-                              className="px-3 py-1.5 rounded-lg text-sm text-red-300 border border-red-500/30 bg-red-500/10 hover:bg-red-500/20"
+                              className="px-2.5 py-1 rounded-lg text-xs font-medium text-red-600 dark:text-red-400 border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 transition cursor-pointer"
                             >
                               Delete
                             </button>
@@ -799,7 +807,7 @@ export default function JobTracker() {
                               onMouseUp={releaseBlur}
                               onMouseLeave={releaseBlur}
                               onTouchEnd={releaseBlur}
-                              className="px-3 py-1.5 rounded-lg text-sm text-blue-300 border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20"
+                              className="px-2.5 py-1 rounded-lg text-xs font-medium text-blue-600 dark:text-blue-400 border border-blue-500/20 bg-blue-500/10 hover:bg-blue-500/20 transition cursor-pointer"
                             >
                               Edit
                             </button>
@@ -808,7 +816,7 @@ export default function JobTracker() {
                               onMouseUp={releaseBlur}
                               onMouseLeave={releaseBlur}
                               onTouchEnd={releaseBlur}
-                              className="px-3 py-1.5 rounded-lg text-sm text-gray-300 border border-white/10 bg-white/5 hover:bg-white/10"
+                              className="px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/5 hover:bg-black/[0.05] dark:hover:bg-white/10 transition cursor-pointer"
                             >
                               Archive
                             </button>

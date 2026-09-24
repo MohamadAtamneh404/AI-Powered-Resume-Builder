@@ -144,7 +144,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }) {
           </div>
           <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-purple-500 to-cyan-400 transition-all duration-300"
+              className="h-full bg-[#9fff00] transition-all duration-300"
               style={{ width: `${(step / 3) * 100}%` }}
             />
           </div>
@@ -173,11 +173,11 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }) {
                     onClick={() => setSelectedPathway(p.id)}
                     className={`w-full p-4 rounded-2xl border text-left transition-all flex items-start gap-4 ${
                       selectedPathway === p.id
-                        ? "bg-purple-600/15 border-purple-500/60 shadow-lg shadow-purple-600/10 ring-1 ring-purple-500/30"
+                        ? "bg-[#9fff00]/15 border-[#9fff00]/60 shadow-lg shadow-[#9fff00]/10 ring-1 ring-[#9fff00]/30"
                         : "bg-slate-950/60 border-white/10 hover:bg-slate-800/60 hover:border-white/20"
                     }`}
                   >
-                    <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-lg flex-shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[#9fff00]/20 border border-[#9fff00]/30 flex items-center justify-center text-lg flex-shrink-0">
                       {p.icon}
                     </div>
                     <div className="flex-grow">
@@ -198,7 +198,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }) {
                     <div
                       className={`w-5 h-5 rounded-full border flex items-center justify-center mt-1 flex-shrink-0 ${
                         selectedPathway === p.id
-                          ? "border-purple-400 bg-purple-500 text-white text-[10px]"
+                          ? "border-[#9fff00] bg-[#9fff00] text-black text-[10px]"
                           : "border-slate-600"
                       }`}
                     >
@@ -222,7 +222,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }) {
                   value={roleTitle}
                   onChange={(e) => setRoleTitle(e.target.value)}
                   placeholder="e.g. Senior Full Stack Engineer"
-                  className="w-full rounded-xl bg-slate-950 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                  className="w-full rounded-xl bg-slate-950 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#9fff00]/50"
                 />
               </div>
 
@@ -238,7 +238,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }) {
                       onClick={() => setRoleTitle(r)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
                         roleTitle === r
-                          ? "bg-purple-600 text-white border-purple-400"
+                          ? "bg-[#9fff00] text-black border-[#9fff00]"
                           : "bg-slate-950 text-slate-300 border-white/10 hover:bg-slate-800"
                       }`}
                     >
@@ -289,7 +289,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }) {
                   value={jobDescription}
                   onChange={(e) => handleJdChange(e.target.value)}
                   placeholder="Paste a job post snippet here to extract required keywords and match algorithms..."
-                  className="w-full rounded-xl bg-slate-950 border border-white/10 p-3 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 font-mono"
+                  className="w-full rounded-xl bg-slate-950 border border-white/10 p-3 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#9fff00]/50 font-mono"
                 />
               </div>
 
@@ -316,7 +316,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }) {
               </div>
 
               {/* Contextual ATS Insight Banner */}
-              <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-purple-500/30 flex items-center gap-3">
+              <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-[#9fff00]/30 flex items-center gap-3">
                 <span className="text-2xl">💡</span>
                 <p className="text-xs text-slate-300 leading-relaxed">
                   <strong>ATS Optimization Rule:</strong> Including at least 5
@@ -346,7 +346,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }) {
             <button
               type="button"
               onClick={() => setStep((s) => s + 1)}
-              className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 shadow-lg shadow-purple-600/20 transition flex items-center gap-1.5"
+              className="px-5 py-2.5 rounded-xl text-xs font-bold text-black bg-[#9fff00] hover:bg-[#9fff00] text-black shadow-lg shadow-[#9fff00]/20 transition flex items-center gap-1.5"
             >
               <span>Continue</span>
               <span>→</span>
@@ -355,7 +355,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }) {
             <button
               type="button"
               onClick={handleFinish}
-              className="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 shadow-lg shadow-purple-600/20 transition flex items-center gap-2"
+              className="px-6 py-2.5 rounded-xl text-xs font-bold text-black bg-[#9fff00] hover:bg-[#8fee00] shadow-lg shadow-[#9fff00]/20 transition flex items-center gap-2"
             >
               <span>⚡ Launch Resume Architect</span>
               <span>→</span>

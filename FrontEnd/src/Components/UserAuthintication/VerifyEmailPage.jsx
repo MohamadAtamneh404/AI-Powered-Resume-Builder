@@ -68,12 +68,12 @@ const VerifyEmailContent = ({ email, onClose, setUser }) => {
           onChange={(e) => setCode(e.target.value)}
           required
           disabled={loading || !!message}
-          className="w-full px-3 py-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="w-full px-3 py-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-[#9fff00]"
         />
         <button
           type="submit"
           disabled={loading || !!message}
-          className="w-full py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold transition flex justify-center items-center"
+          className="w-full py-2 rounded-lg bg-[#1a1a1a] dark:bg-[#9fff00] hover:bg-[#1a1a1a] dark:bg-[#9fff00] text-white font-semibold transition flex justify-center items-center"
         >
           {loading ? "Verifying..." : "Verify & Log In"}
         </button>

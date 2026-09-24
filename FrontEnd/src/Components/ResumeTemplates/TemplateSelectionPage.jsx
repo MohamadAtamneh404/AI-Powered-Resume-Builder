@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 const Spinner = () => (
   <div className="flex justify-center items-center py-12 w-full">
     <svg
-      className="animate-spin h-8 w-8 text-purple-500"
+      className="animate-spin h-8 w-8 text-[#9fff00]"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
@@ -123,15 +123,16 @@ const TemplateSelectionPage = () => {
                     key={template.id || template._id}
                     className={`p-4 rounded-lg cursor-pointer transition ${
                       isSelected
-                        ? "bg-purple-600 text-white"
+                        ? "bg-[#9fff00] text-black"
                         : "bg-gray-800 text-gray-300 hover:bg-gray-700"
                     }`}
                     onClick={() => handleSelectTemplate(template)}
                   >
-                  <h2 className="font-bold">{template.name}</h2>
-                  <p className="text-sm opacity-80">{template.description}</p>
-                </li>
-              ))}
+                    <h2 className="font-bold">{template.name}</h2>
+                    <p className="text-sm opacity-80">{template.description}</p>
+                  </li>
+                );
+              })}
             </ul>
             <button
               onClick={handleUseTemplate}

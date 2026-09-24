@@ -19,7 +19,7 @@ const InlineEdit = ({
   useEffect(() => {
     // Only update the DOM when the component is not focused
     // This prevents the cursor from jumping to the start/end when typing
-    if (elementRef.current && !isFocused && (!type && tag !== "input")) {
+    if (elementRef.current && !isFocused && !type && tag !== "input") {
       if (elementRef.current.textContent !== value) {
         elementRef.current.textContent = value;
       }

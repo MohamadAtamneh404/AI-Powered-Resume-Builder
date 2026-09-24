@@ -115,11 +115,36 @@ export default function JobModal({ isOpen, job, onClose, onSave, user }) {
                   onChange={handleChange}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-[#EDEEF5]/60 dark:bg-zinc-800 border border-black/[0.08] dark:border-white/[0.1] text-[#1a1a1a] dark:text-zinc-100 focus:outline-none focus:border-[#1a1a1a] dark:focus:border-zinc-400 focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 text-xs transition cursor-pointer"
                 >
-                  <option value="Applied" className="bg-white dark:bg-zinc-900 text-[#1a1a1a] dark:text-zinc-100">Applied</option>
-                  <option value="Interviewing" className="bg-white dark:bg-zinc-900 text-[#1a1a1a] dark:text-zinc-100">Interviewing</option>
-                  <option value="Offer" className="bg-white dark:bg-zinc-900 text-[#1a1a1a] dark:text-zinc-100">Offer</option>
-                  <option value="Rejected" className="bg-white dark:bg-zinc-900 text-[#1a1a1a] dark:text-zinc-100">Rejected</option>
-                  <option value="Saved" className="bg-white dark:bg-zinc-900 text-[#1a1a1a] dark:text-zinc-100">Saved</option>
+                  <option
+                    value="Applied"
+                    className="bg-white dark:bg-zinc-900 text-[#1a1a1a] dark:text-zinc-100"
+                  >
+                    Applied
+                  </option>
+                  <option
+                    value="Interviewing"
+                    className="bg-white dark:bg-zinc-900 text-[#1a1a1a] dark:text-zinc-100"
+                  >
+                    Interviewing
+                  </option>
+                  <option
+                    value="Offer"
+                    className="bg-white dark:bg-zinc-900 text-[#1a1a1a] dark:text-zinc-100"
+                  >
+                    Offer
+                  </option>
+                  <option
+                    value="Rejected"
+                    className="bg-white dark:bg-zinc-900 text-[#1a1a1a] dark:text-zinc-100"
+                  >
+                    Rejected
+                  </option>
+                  <option
+                    value="Saved"
+                    className="bg-white dark:bg-zinc-900 text-[#1a1a1a] dark:text-zinc-100"
+                  >
+                    Saved
+                  </option>
                 </select>
               </div>
 

@@ -475,8 +475,11 @@ class App {
     this.scroll.target = this.scroll.target < 0 ? -item : item;
   }
   onResize() {
-    const containerWidth = this.container.clientWidth || (typeof window !== "undefined" ? window.innerWidth : 800);
-    const containerHeight = this.container.clientHeight > 50 ? this.container.clientHeight : 540;
+    const containerWidth =
+      this.container.clientWidth ||
+      (typeof window !== "undefined" ? window.innerWidth : 800);
+    const containerHeight =
+      this.container.clientHeight > 50 ? this.container.clientHeight : 540;
     this.screen = {
       width: containerWidth,
       height: containerHeight,

@@ -76,10 +76,10 @@ export default function Dashboard() {
           serverResumes = Array.isArray(resData)
             ? resData
             : Array.isArray(resData?.items)
-            ? resData.items
-            : Array.isArray(resData?.resumes)
-            ? resData.resumes
-            : [];
+              ? resData.items
+              : Array.isArray(resData?.resumes)
+                ? resData.resumes
+                : [];
         }
 
         // Also check localStorage drafts in case of offline saves or unsynced drafts
@@ -88,7 +88,9 @@ export default function Dashboard() {
           localDrafts = JSON.parse(
             localStorage.getItem("resume_drafts") || "[]",
           );
-        } catch {}
+        } catch {
+          // Ignore local storage parse error
+        }
 
         if (Array.isArray(localDrafts) && localDrafts.length > 0) {
           const serverIds = new Set(
@@ -133,7 +135,9 @@ export default function Dashboard() {
                 "resume_drafts",
                 JSON.stringify(remainingDrafts),
               );
-            } catch {}
+            } catch {
+              // Ignore storage update error
+            }
           }
         }
 
@@ -191,7 +195,9 @@ export default function Dashboard() {
           (d) => String(d.id || d._id) !== String(id),
         );
         localStorage.setItem("resume_drafts", JSON.stringify(updated));
-      } catch {}
+      } catch {
+        // Ignore local storage error
+      }
       setResumes((prev) => prev.filter((r) => (r.id || r._id) !== id));
     } catch (err) {
       console.error("Error deleting resume:", err);
@@ -209,7 +215,7 @@ export default function Dashboard() {
             <span>ATS Compliance Status: {atsStatusLabel}</span>
           </div>
           <h1 className="font-['Outfit'] text-2xl sm:text-3xl md:text-4xl font-bold text-[#1a1a1a] dark:text-zinc-100 tracking-tight">
-            Career Command Center
+            Dashboard
           </h1>
           <p className="text-sm text-[#8e8e8e] dark:text-zinc-400 mt-1.5 max-w-xl">
             Monitor verified ATS parser readiness, tailor resumes to new job
@@ -246,7 +252,11 @@ export default function Dashboard() {
           icon={<ShieldCheck size={18} />}
           label="ATS Readiness"
           value={resumes.length > 0 ? `${averageAtsScore}%` : "—"}
-          subtext={resumes.length > 0 ? "Real-time composite score" : "Create a resume to scan"}
+          subtext={
+            resumes.length > 0
+              ? "Real-time composite score"
+              : "Create a resume to scan"
+          }
           highlight={true}
         />
         <StatCard
@@ -370,15 +380,23 @@ export default function Dashboard() {
             <tbody className="divide-y divide-black/[0.04] dark:divide-white/[0.06]">
               {jobs.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="py-8 text-center text-[#8e8e8e] dark:text-zinc-400">
+                  <td
+                    colSpan="5"
+                    className="py-8 text-center text-[#8e8e8e] dark:text-zinc-400"
+                  >
                     No job audits yet. Add applications in the Job Tracker.
                   </td>
                 </tr>
               ) : (
                 jobs.slice(0, 5).map((job) => (
-                  <tr key={job.id || job._id} className="hover:bg-black/[0.01] dark:hover:bg-white/[0.02]">
+                  <tr
+                    key={job.id || job._id}
+                    className="hover:bg-black/[0.01] dark:hover:bg-white/[0.02]"
+                  >
                     <td className="py-4">
-                      <div className="font-semibold text-[#1a1a1a] dark:text-zinc-100">{job.company || "Unknown Company"}</div>
+                      <div className="font-semibold text-[#1a1a1a] dark:text-zinc-100">
+                        {job.company || "Unknown Company"}
+                      </div>
                       <div className="text-[11px] text-[#8e8e8e] dark:text-zinc-400">
                         {job.position || "Unknown Role"}
                       </div>

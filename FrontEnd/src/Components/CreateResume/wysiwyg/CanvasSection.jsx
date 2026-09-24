@@ -24,24 +24,24 @@ function SectionToolbar({
   downDisabled,
 }) {
   return (
-    <div className="absolute -top-3 right-2 z-20 flex items-center gap-0.5 bg-white border border-black/[0.08] rounded-lg shadow-lg px-1.5 py-0.5 opacity-0 group-hover/section:opacity-100 transition-opacity duration-200">
+    <div className="absolute -top-3 right-2 z-20 flex items-center gap-0.5 bg-white border border-black/[0.08] rounded-lg shadow-lg px-1.5 py-0.5 opacity-0 group-hover/section:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
       {onAiAssist && (
         <>
           <button
             type="button"
             onClick={onAiAssist}
             disabled={isAiLoading}
-            className="p-1 rounded hover:bg-purple-50 text-purple-600 hover:text-purple-800 transition flex items-center gap-1 text-[11px] font-semibold pr-1.5 disabled:opacity-75"
+            className="p-1 rounded hover:bg-zinc-100 text-[#1a1a1a] dark:text-[#9fff00] hover:text-zinc-800 transition flex items-center gap-1 text-[11px] font-semibold pr-1.5 disabled:opacity-75"
             title="AI Assist for this section"
           >
             {isAiLoading ? (
               <>
-                <Loader2 size={12} className="animate-spin text-purple-600" />
+                <Loader2 size={12} className="animate-spin text-[#1a1a1a] dark:text-[#9fff00]" />
                 <span>Thinking...</span>
               </>
             ) : (
               <>
-                <Sparkles size={12} className="text-purple-600" />
+                <Sparkles size={12} className="text-[#1a1a1a] dark:text-[#9fff00]" />
                 <span>AI Assist</span>
               </>
             )}
@@ -79,7 +79,7 @@ function SectionToolbar({
       <button
         type="button"
         onClick={onDelete}
-        className="p-1 rounded hover:bg-red-50 text-zinc-400 hover:text-red-500 transition"
+        className="p-1 rounded hover:bg-red-50 text-red-400 hover:text-red-600 transition"
         title="Delete section"
       >
         <Trash2 size={14} />
@@ -89,40 +89,52 @@ function SectionToolbar({
 }
 
 /* ─── Layout-Variant-Aware Section Heading ─── */
-function SectionHeading({ title, template, onAiAssist, extraAction, isAiLoading = false }) {
+function SectionHeading({
+  title,
+  template,
+  onAiAssist,
+  extraAction,
+  isAiLoading = false,
+}) {
   const layoutVariant = template?.layoutVariant || "classic";
   const primaryColor =
-    template?.theme?.colors?.primary && template.theme.colors.primary !== "#9fff00"
+    template?.theme?.colors?.primary &&
+    template.theme.colors.primary !== "#9fff00"
       ? template.theme.colors.primary
       : "#111827";
 
-  let headingClass = "text-xs font-bold uppercase tracking-widest pb-1 mb-2.5 flex items-center justify-between";
+  let headingClass =
+    "text-xs font-bold uppercase tracking-widest pb-1 mb-2.5 flex items-center justify-between";
   let headingStyle = {
     borderBottom: `1.5px solid ${primaryColor}`,
     color: primaryColor !== "#111827" ? primaryColor : "#111827",
   };
 
   if (layoutVariant === "modern") {
-    headingClass = "text-xs font-bold uppercase tracking-wider pl-2.5 pb-0.5 mb-2.5 flex items-center justify-between";
+    headingClass =
+      "text-xs font-bold uppercase tracking-wider pl-2.5 pb-0.5 mb-2.5 flex items-center justify-between";
     headingStyle = {
       borderLeft: `4px solid ${primaryColor}`,
       color: primaryColor,
     };
   } else if (layoutVariant === "executive") {
-    headingClass = "text-center text-xs font-bold uppercase tracking-[0.2em] font-serif py-1 mb-3 flex items-center justify-between";
+    headingClass =
+      "text-center text-xs font-bold uppercase tracking-[0.2em] font-serif py-1 mb-3 flex items-center justify-between";
     headingStyle = {
       borderTop: `1px solid #94a3b8`,
       borderBottom: `1px solid #94a3b8`,
       color: primaryColor !== "#111827" ? primaryColor : "#1e293b",
     };
   } else if (layoutVariant === "developer") {
-    headingClass = "text-xs font-bold font-mono tracking-wider pb-1 mb-2.5 flex items-center justify-between";
+    headingClass =
+      "text-xs font-bold font-mono tracking-wider pb-1 mb-2.5 flex items-center justify-between";
     headingStyle = {
       borderBottom: `2px solid ${primaryColor}`,
       color: primaryColor,
     };
   } else if (layoutVariant === "compact") {
-    headingClass = "text-[11px] font-bold uppercase tracking-wider pb-0.5 mb-1.5 flex items-center justify-between";
+    headingClass =
+      "text-[11px] font-bold uppercase tracking-wider pb-0.5 mb-1.5 flex items-center justify-between";
     headingStyle = {
       borderBottom: `1px solid #cbd5e1`,
       color: "#0f172a",
@@ -132,7 +144,9 @@ function SectionHeading({ title, template, onAiAssist, extraAction, isAiLoading 
   return (
     <div className={headingClass} style={headingStyle}>
       <span className="flex items-center gap-1.5">
-        {layoutVariant === "developer" && <span className="opacity-50 text-[10px]">{"//"}</span>}
+        {layoutVariant === "developer" && (
+          <span className="opacity-50 text-[10px]">{"//"}</span>
+        )}
         <span>{title}</span>
       </span>
       <div className="flex items-center gap-1.5 font-sans normal-case tracking-normal">
@@ -142,12 +156,12 @@ function SectionHeading({ title, template, onAiAssist, extraAction, isAiLoading 
             type="button"
             onClick={onAiAssist}
             disabled={isAiLoading}
-            className="opacity-0 group-hover/section:opacity-100 text-[10px] px-2 py-0.5 rounded bg-purple-50 hover:bg-purple-100 text-purple-700 font-semibold transition flex items-center gap-1 disabled:opacity-75"
+            className="opacity-0 group-hover/section:opacity-100 focus-visible:opacity-100 focus-within:opacity-100 text-[10px] px-2 py-0.5 rounded bg-zinc-100 hover:bg-zinc-200 text-[#1a1a1a] font-semibold transition flex items-center gap-1 disabled:opacity-75"
             title="AI Assist"
           >
             {isAiLoading ? (
               <>
-                <Loader2 size={10} className="animate-spin text-purple-600" />
+                <Loader2 size={10} className="animate-spin text-[#1a1a1a] dark:text-[#9fff00]" />
                 <span>Thinking...</span>
               </>
             ) : (
@@ -163,21 +177,29 @@ function SectionHeading({ title, template, onAiAssist, extraAction, isAiLoading 
   );
 }
 
-
 /* ─── Entry Row Toolbar (appears on entry hover) ─── */
-function EntryToolbar({ onDuplicate, onDelete, onAiBullets, isGeneratingBullets = false }) {
+function EntryToolbar({
+  onDuplicate,
+  onDelete,
+  onAiBullets,
+  isGeneratingBullets = false,
+}) {
   return (
-    <div className="absolute -right-1 top-0 z-10 flex items-center gap-0.5 bg-white border border-black/[0.08] rounded-md shadow-md px-0.5 py-0.5 opacity-0 group-hover/entry:opacity-100 transition-opacity">
+    <div className="absolute -right-1 top-0 z-10 flex items-center gap-0.5 bg-white border border-black/[0.08] rounded-md shadow-md px-0.5 py-0.5 opacity-0 group-hover/entry:opacity-100 focus-within:opacity-100 transition-opacity">
       {onAiBullets && (
         <button
           type="button"
           onClick={onAiBullets}
           disabled={isGeneratingBullets}
           className="p-1 rounded hover:bg-[#9fff00]/10 text-zinc-400 hover:text-[#1a1a1a] transition disabled:opacity-75"
-          title={isGeneratingBullets ? "AI is generating bullets..." : "Generate AI bullets"}
+          title={
+            isGeneratingBullets
+              ? "AI is generating bullets..."
+              : "Generate AI bullets"
+          }
         >
           {isGeneratingBullets ? (
-            <Loader2 size={12} className="animate-spin text-purple-600" />
+            <Loader2 size={12} className="animate-spin text-[#1a1a1a] dark:text-[#9fff00]" />
           ) : (
             <Sparkles size={12} />
           )}
@@ -194,7 +216,7 @@ function EntryToolbar({ onDuplicate, onDelete, onAiBullets, isGeneratingBullets 
       <button
         type="button"
         onClick={onDelete}
-        className="p-1 rounded hover:bg-red-50 text-zinc-400 hover:text-red-500 transition"
+        className="p-1 rounded hover:bg-red-50 text-red-400 hover:text-red-600 transition"
         title="Remove entry"
       >
         <X size={12} />
@@ -235,7 +257,7 @@ function BulletListEditor({ bullets = [], onChange }) {
             <button
               type="button"
               onClick={() => removeBullet(idx)}
-              className="absolute -right-5 top-0 opacity-0 group-hover/bullet:opacity-100 p-0.5 text-zinc-300 hover:text-red-400 transition"
+              className="absolute -right-5 top-0 opacity-0 group-hover/bullet:opacity-100 focus-visible:opacity-100 p-0.5 text-zinc-400 hover:text-red-500 transition"
             >
               <X size={10} />
             </button>
@@ -290,7 +312,7 @@ function KeywordChipsEditor({ keywords = [], onChange }) {
           <button
             type="button"
             onClick={() => removeKeyword(idx)}
-            className="opacity-0 group-hover/chip:opacity-100 text-zinc-400 hover:text-red-500 transition ml-0.5"
+            className="opacity-0 group-hover/chip:opacity-100 focus-visible:opacity-100 text-zinc-400 hover:text-red-500 transition ml-0.5"
           >
             <X size={8} />
           </button>
@@ -313,7 +335,8 @@ function KeywordChipsEditor({ keywords = [], onChange }) {
 function HeaderSection({ basics, onBasicsChange, template }) {
   const layoutVariant = template?.layoutVariant || "classic";
   const primaryColor =
-    template?.theme?.colors?.primary && template.theme.colors.primary !== "#9fff00"
+    template?.theme?.colors?.primary &&
+    template.theme.colors.primary !== "#9fff00"
       ? template.theme.colors.primary
       : "#111827";
 
@@ -326,14 +349,18 @@ function HeaderSection({ basics, onBasicsChange, template }) {
         l
           ? {
               network: "LinkedIn",
-              username: l.replace(/^(https?:\/\/)?(www\.)?linkedin\.com\/in\/?/i, "").replace(/\/+$/, ""),
+              username: l
+                .replace(/^(https?:\/\/)?(www\.)?linkedin\.com\/in\/?/i, "")
+                .replace(/\/+$/, ""),
               url: l.startsWith("http") ? l : `https://linkedin.com/in/${l}`,
             }
           : null,
         g
           ? {
               network: "GitHub",
-              username: g.replace(/^(https?:\/\/)?(www\.)?github\.com\/?/i, "").replace(/\/+$/, ""),
+              username: g
+                .replace(/^(https?:\/\/)?(www\.)?github\.com\/?/i, "")
+                .replace(/\/+$/, ""),
               url: g.startsWith("http") ? g : `https://github.com/${g}`,
             }
           : null,
@@ -351,22 +378,26 @@ function HeaderSection({ basics, onBasicsChange, template }) {
 
   const linkedinVal =
     basics.linkedin ??
-    (basics.profiles || []).find((p) => p.network?.toLowerCase() === "linkedin")?.username ??
+    (basics.profiles || []).find((p) => p.network?.toLowerCase() === "linkedin")
+      ?.username ??
     "";
   const githubVal =
     basics.github ??
-    (basics.profiles || []).find((p) => p.network?.toLowerCase() === "github")?.username ??
+    (basics.profiles || []).find((p) => p.network?.toLowerCase() === "github")
+      ?.username ??
     "";
 
   // Layout-variant specific wrapper & styling
   let headerWrapperClass = "pb-4 mb-5 border-b text-center";
   let headerBorderColor = primaryColor !== "#111827" ? primaryColor : "#111827";
-  let nameClass = "text-2xl sm:text-3xl font-bold uppercase tracking-tight text-gray-900";
+  let nameClass =
+    "text-2xl sm:text-3xl font-bold uppercase tracking-tight text-gray-900";
   let contactJustify = "justify-center";
 
   if (layoutVariant === "executive") {
     headerWrapperClass = "pb-4 mb-5 text-center";
-    nameClass = "text-2xl sm:text-3xl font-serif font-bold uppercase tracking-[0.15em] text-gray-900";
+    nameClass =
+      "text-2xl sm:text-3xl font-serif font-bold uppercase tracking-[0.15em] text-gray-900";
     contactJustify = "justify-center font-serif";
   } else if (layoutVariant === "modern") {
     headerWrapperClass = "pb-4 mb-5 text-left border-b-2";
@@ -398,9 +429,11 @@ function HeaderSection({ basics, onBasicsChange, template }) {
         tag="h1"
         className={nameClass}
         style={{
-          color: (layoutVariant === "modern" || layoutVariant === "developer") && primaryColor !== "#111827"
-            ? primaryColor
-            : undefined,
+          color:
+            (layoutVariant === "modern" || layoutVariant === "developer") &&
+            primaryColor !== "#111827"
+              ? primaryColor
+              : undefined,
         }}
       />
       <InlineEdit
@@ -408,10 +441,14 @@ function HeaderSection({ basics, onBasicsChange, template }) {
         onChange={(v) => update("label", v)}
         placeholder="Professional Title"
         className={`text-sm font-medium mt-0.5 ${
-          layoutVariant === "developer" ? "font-mono text-teal-800" : "text-gray-700"
+          layoutVariant === "developer"
+            ? "font-mono text-teal-800"
+            : "text-gray-700"
         }`}
       />
-      <div className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-2 text-xs text-gray-700 ${contactJustify}`}>
+      <div
+        className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-2 text-xs text-gray-700 ${contactJustify}`}
+      >
         {[
           {
             val: basics.email,
@@ -481,9 +518,18 @@ function HeaderSection({ basics, onBasicsChange, template }) {
 }
 
 /* ─── Summary Section ─── */
-function SummarySection({ block, blockIndex, onUpdateBlock, template, onAiAssist, isAiWorking = false }) {
+function SummarySection({
+  block,
+  blockIndex,
+  onUpdateBlock,
+  template,
+  onAiAssist,
+  isAiWorking = false,
+}) {
   return (
-    <section className={template?.layoutVariant === "compact" ? "mb-3" : "mb-5"}>
+    <section
+      className={template?.layoutVariant === "compact" ? "mb-3" : "mb-5"}
+    >
       <SectionHeading
         title="Professional Summary"
         template={template}
@@ -494,12 +540,12 @@ function SummarySection({ block, blockIndex, onUpdateBlock, template, onAiAssist
             type="button"
             onClick={onAiAssist}
             disabled={isAiWorking}
-            className="text-[10px] text-purple-600 hover:text-purple-700 flex items-center gap-1 font-semibold disabled:opacity-75"
+            className="text-[10px] text-[#1a1a1a] dark:text-[#9fff00] hover:text-[#1a1a1a] flex items-center gap-1 font-semibold disabled:opacity-75"
             title="Generate or polish summary with AI"
           >
             {isAiWorking ? (
               <>
-                <Loader2 size={11} className="animate-spin text-purple-600" />
+                <Loader2 size={11} className="animate-spin text-[#1a1a1a] dark:text-[#9fff00]" />
                 <span>Polishing...</span>
               </>
             ) : (
@@ -516,7 +562,9 @@ function SummarySection({ block, blockIndex, onUpdateBlock, template, onAiAssist
         onChange={(v) => onUpdateBlock(blockIndex, { content: v })}
         placeholder="Write a compelling professional summary..."
         className={`text-xs text-gray-800 leading-relaxed whitespace-pre-line ${
-          template?.layoutVariant === "executive" ? "font-serif text-[12.5px]" : ""
+          template?.layoutVariant === "executive"
+            ? "font-serif text-[12.5px]"
+            : ""
         }`}
         multiline
       />
@@ -572,7 +620,9 @@ function WorkSection({
   };
 
   return (
-    <section className={template?.layoutVariant === "compact" ? "mb-3" : "mb-5"}>
+    <section
+      className={template?.layoutVariant === "compact" ? "mb-3" : "mb-5"}
+    >
       <SectionHeading
         title="Work Experience"
         template={template}
@@ -583,12 +633,12 @@ function WorkSection({
             type="button"
             onClick={onAiAssist}
             disabled={isAiWorking}
-            className="text-[10px] text-purple-600 hover:text-purple-700 flex items-center gap-1 font-semibold disabled:opacity-75"
+            className="text-[10px] text-[#1a1a1a] dark:text-[#9fff00] hover:text-[#1a1a1a] flex items-center gap-1 font-semibold disabled:opacity-75"
             title="Enrich work bullets with metrics & action verbs"
           >
             {isAiWorking ? (
               <>
-                <Loader2 size={11} className="animate-spin text-purple-600" />
+                <Loader2 size={11} className="animate-spin text-[#1a1a1a] dark:text-[#9fff00]" />
                 <span>Enriching...</span>
               </>
             ) : (
@@ -681,7 +731,13 @@ function WorkSection({
 }
 
 /* ─── Education Section ─── */
-function EducationSection({ block, blockIndex, onUpdateBlock, template, onAiAssist }) {
+function EducationSection({
+  block,
+  blockIndex,
+  onUpdateBlock,
+  template,
+  onAiAssist,
+}) {
   const entries = block.entries || [];
 
   const updateEntry = (entryIdx, patch) => {
@@ -714,7 +770,9 @@ function EducationSection({ block, blockIndex, onUpdateBlock, template, onAiAssi
   };
 
   return (
-    <section className={template?.layoutVariant === "compact" ? "mb-3" : "mb-5"}>
+    <section
+      className={template?.layoutVariant === "compact" ? "mb-3" : "mb-5"}
+    >
       <SectionHeading
         title="Education"
         template={template}
@@ -740,18 +798,14 @@ function EducationSection({ block, blockIndex, onUpdateBlock, template, onAiAssi
                   tag="span"
                   className="font-bold text-gray-900"
                 />
-                {(entry.area || true) && (
-                  <>
-                    <span className="text-gray-600">in</span>
-                    <InlineEdit
-                      value={entry.area || ""}
-                      onChange={(v) => updateEntry(entryIdx, { area: v })}
-                      placeholder="Field of Study"
-                      tag="span"
-                      className="font-bold text-gray-900"
-                    />
-                  </>
-                )}
+                <span className="text-gray-600">in</span>
+                <InlineEdit
+                  value={entry.area || ""}
+                  onChange={(v) => updateEntry(entryIdx, { area: v })}
+                  placeholder="Field of Study"
+                  tag="span"
+                  className="font-bold text-gray-900"
+                />
                 <span className="text-gray-400">|</span>
                 <InlineEdit
                   value={entry.institution || ""}
@@ -777,18 +831,16 @@ function EducationSection({ block, blockIndex, onUpdateBlock, template, onAiAssi
                 />
               </div>
             </div>
-            {(entry.score || true) && (
-              <div className="flex items-baseline gap-1 mt-0.5 text-xs text-gray-600">
-                <span>GPA:</span>
-                <InlineEdit
-                  value={entry.score || ""}
-                  onChange={(v) => updateEntry(entryIdx, { score: v })}
-                  placeholder="—"
-                  tag="span"
-                  className="text-gray-600"
-                />
-              </div>
-            )}
+            <div className="flex items-baseline gap-1 mt-0.5 text-xs text-gray-600">
+              <span>GPA:</span>
+              <InlineEdit
+                value={entry.score || ""}
+                onChange={(v) => updateEntry(entryIdx, { score: v })}
+                placeholder="—"
+                tag="span"
+                className="text-gray-600"
+              />
+            </div>
           </div>
         ))}
       </div>
@@ -805,7 +857,14 @@ function EducationSection({ block, blockIndex, onUpdateBlock, template, onAiAssi
 }
 
 /* ─── Skills Section ─── */
-function SkillsSection({ block, blockIndex, onUpdateBlock, template, onAiAssist, isAiWorking = false }) {
+function SkillsSection({
+  block,
+  blockIndex,
+  onUpdateBlock,
+  template,
+  onAiAssist,
+  isAiWorking = false,
+}) {
   const groups = block.groups || [];
 
   const updateGroup = (groupIdx, patch) => {
@@ -827,7 +886,9 @@ function SkillsSection({ block, blockIndex, onUpdateBlock, template, onAiAssist,
   };
 
   return (
-    <section className={template?.layoutVariant === "compact" ? "mb-3" : "mb-5"}>
+    <section
+      className={template?.layoutVariant === "compact" ? "mb-3" : "mb-5"}
+    >
       <SectionHeading
         title="Technical & Domain Skills"
         template={template}
@@ -838,12 +899,12 @@ function SkillsSection({ block, blockIndex, onUpdateBlock, template, onAiAssist,
             type="button"
             onClick={onAiAssist}
             disabled={isAiWorking}
-            className="text-[10px] text-purple-600 hover:text-purple-700 flex items-center gap-1 font-semibold disabled:opacity-75"
+            className="text-[10px] text-[#1a1a1a] dark:text-[#9fff00] hover:text-[#1a1a1a] flex items-center gap-1 font-semibold disabled:opacity-75"
             title="Suggest skills with AI"
           >
             {isAiWorking ? (
               <>
-                <Loader2 size={11} className="animate-spin text-purple-600" />
+                <Loader2 size={11} className="animate-spin text-[#1a1a1a] dark:text-[#9fff00]" />
                 <span>Suggesting...</span>
               </>
             ) : (
@@ -878,7 +939,7 @@ function SkillsSection({ block, blockIndex, onUpdateBlock, template, onAiAssist,
             <button
               type="button"
               onClick={() => removeGroup(groupIdx)}
-              className="opacity-0 group-hover/entry:opacity-100 p-0.5 text-zinc-300 hover:text-red-400 transition shrink-0"
+              className="opacity-0 group-hover/entry:opacity-100 focus-visible:opacity-100 p-0.5 text-zinc-400 hover:text-red-500 transition shrink-0"
             >
               <X size={10} />
             </button>
@@ -898,7 +959,13 @@ function SkillsSection({ block, blockIndex, onUpdateBlock, template, onAiAssist,
 }
 
 /* ─── Projects Section ─── */
-function ProjectsSection({ block, blockIndex, onUpdateBlock, template, onAiAssist }) {
+function ProjectsSection({
+  block,
+  blockIndex,
+  onUpdateBlock,
+  template,
+  onAiAssist,
+}) {
   const entries = block.entries || [];
 
   const updateEntry = (entryIdx, patch) => {
@@ -923,7 +990,9 @@ function ProjectsSection({ block, blockIndex, onUpdateBlock, template, onAiAssis
   };
 
   return (
-    <section className={template?.layoutVariant === "compact" ? "mb-3" : "mb-5"}>
+    <section
+      className={template?.layoutVariant === "compact" ? "mb-3" : "mb-5"}
+    >
       <SectionHeading
         title="Key Projects"
         template={template}
@@ -956,17 +1025,15 @@ function ProjectsSection({ block, blockIndex, onUpdateBlock, template, onAiAssis
                 className="text-xs text-gray-600"
               />
             </div>
-            {(entry.technologies?.length > 0 || true) && (
-              <div className="text-xs italic text-gray-700 mt-0.5 flex items-baseline gap-1">
-                <span className="shrink-0">Technologies:</span>
-                <KeywordChipsEditor
-                  keywords={entry.technologies || []}
-                  onChange={(techs) =>
-                    updateEntry(entryIdx, { technologies: techs })
-                  }
-                />
-              </div>
-            )}
+            <div className="text-xs italic text-gray-700 mt-0.5 flex items-baseline gap-1">
+              <span className="shrink-0">Technologies:</span>
+              <KeywordChipsEditor
+                keywords={entry.technologies || []}
+                onChange={(techs) =>
+                  updateEntry(entryIdx, { technologies: techs })
+                }
+              />
+            </div>
             <InlineEdit
               value={entry.description || ""}
               onChange={(v) => updateEntry(entryIdx, { description: v })}
@@ -1020,7 +1087,9 @@ function GenericEntrySection({
   };
 
   return (
-    <section className={template?.layoutVariant === "compact" ? "mb-3" : "mb-5"}>
+    <section
+      className={template?.layoutVariant === "compact" ? "mb-3" : "mb-5"}
+    >
       <SectionHeading
         title={sectionTitle}
         template={template}
@@ -1069,7 +1138,13 @@ function GenericEntrySection({
 }
 
 /* ─── Languages Section ─── */
-function LanguagesSection({ block, blockIndex, onUpdateBlock, template, onAiAssist }) {
+function LanguagesSection({
+  block,
+  blockIndex,
+  onUpdateBlock,
+  template,
+  onAiAssist,
+}) {
   return (
     <GenericEntrySection
       block={block}
@@ -1121,13 +1196,20 @@ export default function CanvasSection({
 
   const isFirst = blockIndex === 0;
   const isLast = blockIndex === totalBlocks - 1;
-  const onSectionAiAssist = onAiAssistSection ? () => onAiAssistSection(block, blockIndex) : undefined;
+  const onSectionAiAssist = onAiAssistSection
+    ? () => onAiAssistSection(block, blockIndex)
+    : undefined;
 
-  const isSectionAiWorking = Boolean(aiLoading && aiLoadingSection?.blockIndex === blockIndex);
-  const isSectionTypeWorking = Boolean(aiLoading && aiLoadingSection?.type === block.type);
+  const isSectionAiWorking = Boolean(
+    aiLoading && aiLoadingSection?.blockIndex === blockIndex,
+  );
+  const isSectionTypeWorking = Boolean(
+    aiLoading && aiLoadingSection?.type === block.type,
+  );
   const isAiWorking = isSectionAiWorking || isSectionTypeWorking;
   const aiLoadingEntryIndex =
-    aiLoadingSection?.type === "work-entry" && aiLoadingSection?.blockIndex === blockIndex
+    aiLoadingSection?.type === "work-entry" &&
+    aiLoadingSection?.blockIndex === blockIndex
       ? aiLoadingSection.entryIndex
       : null;
 
@@ -1137,7 +1219,7 @@ export default function CanvasSection({
       <div className="relative group/section">
         {/* Drag handle */}
         <div
-          className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover/section:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+          className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover/section:opacity-100 focus-within:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
           {...(dragHandleProps || {})}
         >
           <GripVertical
@@ -1145,7 +1227,11 @@ export default function CanvasSection({
             className="text-zinc-300 hover:text-zinc-500"
           />
         </div>
-        <HeaderSection basics={basics} onBasicsChange={onBasicsChange} template={template} />
+        <HeaderSection
+          basics={basics}
+          onBasicsChange={onBasicsChange}
+          template={template}
+        />
       </div>
     );
   }
@@ -1344,7 +1430,11 @@ export default function CanvasSection({
       default:
         return (
           <section className="mb-5">
-            <SectionHeading title={block.title || block.type} template={template} onAiAssist={onSectionAiAssist} />
+            <SectionHeading
+              title={block.title || block.type}
+              template={template}
+              onAiAssist={onSectionAiAssist}
+            />
             <p className="text-xs text-gray-500 italic">
               Unknown section type: {block.type}
             </p>
@@ -1357,7 +1447,7 @@ export default function CanvasSection({
     <div className="relative group/section">
       {/* Drag handle */}
       <div
-        className="absolute -left-8 top-3 opacity-0 group-hover/section:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+        className="absolute -left-8 top-3 opacity-0 group-hover/section:opacity-100 focus-within:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
         {...(dragHandleProps || {})}
       >
         <GripVertical size={16} className="text-zinc-300 hover:text-zinc-500" />
@@ -1382,4 +1472,3 @@ export default function CanvasSection({
     </div>
   );
 }
-

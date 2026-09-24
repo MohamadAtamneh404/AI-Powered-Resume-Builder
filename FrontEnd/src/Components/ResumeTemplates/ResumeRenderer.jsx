@@ -21,7 +21,11 @@ const iconMap = {
 };
 
 // Dedicated 100% ATS-Compliant Single-Column Renderer
-export const AtsClassicRenderer = ({ resumeData, fontFamily, primaryColor }) => {
+export const AtsClassicRenderer = ({
+  resumeData,
+  fontFamily,
+  primaryColor,
+}) => {
   const p = resumeData?.personalInfo || resumeData?.basics || {};
   const exp = resumeData?.experience || resumeData?.work || [];
   const edu = resumeData?.education || [];
@@ -78,7 +82,9 @@ export const AtsClassicRenderer = ({ resumeData, fontFamily, primaryColor }) => 
         width: "210mm",
         minHeight: "297mm",
         boxSizing: "border-box",
-        fontFamily: fontFamily ? `'${fontFamily}', system-ui, sans-serif` : undefined,
+        fontFamily: fontFamily
+          ? `'${fontFamily}', system-ui, sans-serif`
+          : undefined,
       }}
     >
       {/* Header */}

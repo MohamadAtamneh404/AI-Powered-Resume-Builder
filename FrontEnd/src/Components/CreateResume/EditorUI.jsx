@@ -14,7 +14,6 @@ import {
   Zap,
 } from "lucide-react";
 
-
 export function SectionCard({
   title,
   action,
@@ -42,7 +41,7 @@ export function SectionCard({
         >
           <h3 className="text-sm font-semibold text-[#1a1a1a]">{title}</h3>
           {action ? (
-            <div className="text-xs text-purple-300 hover:text-purple-200">
+            <div className="text-xs text-[#9fff00] hover:text-[#9fff00]">
               {action}
             </div>
           ) : null}
@@ -87,8 +86,8 @@ export function AiSuggestionPopover({
 
   return (
     <div className="absolute top-full right-0 mt-2 w-80 sm:w-96 bg-white border border-black/[0.08] rounded-2xl shadow-xl z-30 overflow-hidden text-left">
-      <div className="bg-purple-900/40 px-3.5 py-2.5 border-b border-purple-500/20 flex justify-between items-center">
-        <span className="text-xs font-semibold text-purple-300 flex items-center gap-1.5">
+      <div className="bg-[#9fff00]/10 px-3.5 py-2.5 border-b border-[#9fff00]/20 flex justify-between items-center">
+        <span className="text-xs font-semibold text-[#9fff00] flex items-center gap-1.5">
           <span>✨</span> {title}
         </span>
         {onClose && (
@@ -117,7 +116,7 @@ export function AiSuggestionPopover({
             <button
               type="button"
               onClick={onApply}
-              className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-[#1a1a1a] font-medium text-xs shadow transition"
+              className="px-3.5 py-1.5 rounded-lg bg-[#9fff00] text-[#1a1a1a] hover:bg-[#8fee00] text-white font-medium text-xs shadow transition cursor-pointer"
             >
               Apply
             </button>
@@ -221,7 +220,7 @@ export function ResumePreviewPanel({
             <button
               type="button"
               onClick={dec}
-              className="px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/50"
+              className="px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9fff00]/50"
               aria-label="Zoom out"
             >
               −
@@ -229,7 +228,7 @@ export function ResumePreviewPanel({
             <select
               value={scale}
               onChange={(e) => setScale(parseFloat(e.target.value))}
-              className="bg-[#EDEEF5]/60 border border-black/[0.06] rounded px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/50"
+              className="bg-[#EDEEF5]/60 border border-black/[0.06] rounded px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9fff00]/50"
               aria-label="Zoom level"
             >
               {presets.map((p) => (
@@ -241,14 +240,14 @@ export function ResumePreviewPanel({
             <button
               type="button"
               onClick={inc}
-              className="px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/50"
+              className="px-2 py-1 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9fff00]/50"
               aria-label="Zoom in"
             >
               +
             </button>
           </div>
           {action ? (
-            <div className="text-xs text-purple-300 hover:text-purple-200">
+            <div className="text-xs text-[#9fff00] hover:text-[#9fff00]">
               {action}
             </div>
           ) : null}
@@ -379,227 +378,236 @@ export function AtsCopilotDrawer({
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-
-      {/* Overall Score Dial Card */}
-      <div className="p-4 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 text-white border border-white/10 text-center shadow-lg relative overflow-hidden">
-        <div className="relative inline-flex items-center justify-center my-1">
-          <svg className="w-24 h-24 transform -rotate-90">
-            <circle
-              cx="48"
-              cy="48"
-              r="38"
-              stroke="#1e293b"
-              strokeWidth="7"
-              fill="transparent"
-            />
-            <circle
-              cx="48"
-              cy="48"
-              r="38"
-              className={scoreColor}
-              strokeWidth="7"
-              fill="transparent"
-              strokeDasharray="238"
-              strokeDashoffset={238 - (238 * Math.min(100, Math.max(0, score))) / 100}
-              strokeLinecap="round"
-            />
-          </svg>
-          <div className="absolute flex flex-col items-center">
-            <span className="text-2xl font-extrabold text-white font-mono">
-              {score}
-            </span>
-            <span className="text-[9px] text-slate-400 uppercase font-semibold">
-              ATS Score
-            </span>
-          </div>
-        </div>
-
-        <div className={`mt-1.5 text-xs font-semibold px-3 py-1 rounded-full border inline-block ${scoreBgBadge}`}>
-          {scoreLabel}
-        </div>
-      </div>
-
-      {/* Filter Tabs: All, Needs Improvement, Strengths */}
-      <div className="flex rounded-xl bg-black/[0.04] dark:bg-white/[0.06] p-1 text-xs font-semibold">
-        <button
-          type="button"
-          onClick={() => setActiveTab("all")}
-          className={`flex-1 py-1.5 rounded-lg transition-all ${
-            activeTab === "all"
-              ? "bg-white dark:bg-zinc-800 text-[#1a1a1a] dark:text-white shadow-sm"
-              : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
-          }`}
-        >
-          All ({badParts.length + goodParts.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("bad")}
-          className={`flex-1 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 ${
-            activeTab === "bad"
-              ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 shadow-sm"
-              : "text-zinc-500 hover:text-rose-600 dark:hover:text-rose-400"
-          }`}
-        >
-          <span>Fix</span>
-          <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500 text-white font-mono">
-            {badParts.length}
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("good")}
-          className={`flex-1 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 ${
-            activeTab === "good"
-              ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 shadow-sm"
-              : "text-zinc-500 hover:text-emerald-600 dark:hover:text-emerald-400"
-          }`}
-        >
-          <span>Passed</span>
-          <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-600 text-white font-mono">
-            {goodParts.length}
-          </span>
-        </button>
-      </div>
-
-      {/* Areas to Improve (Bad Parts) with 1-Click AI Fix */}
-      {(activeTab === "all" || activeTab === "bad") && badParts.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-              <AlertTriangle size={14} />
-              <span>Critical ATS Deficiencies ({badParts.length})</span>
-            </span>
-          </div>
-
-          <div className="space-y-2.5">
-            {badParts.map((part) => {
-              const isFixing = fixingPartId === part.id;
-              return (
-                <div
-                  key={part.id}
-                  className="p-3.5 rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/50 dark:bg-rose-950/20 text-xs space-y-2 relative group transition-all"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="font-bold text-rose-950 dark:text-rose-200">
-                      {part.title}
-                    </div>
-                    {part.pointsLost && (
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-700 dark:text-rose-300 font-bold shrink-0">
-                        -{part.pointsLost} pts
-                      </span>
-                    )}
-                  </div>
-
-                  <p className="text-zinc-600 dark:text-zinc-300 text-[11px] leading-relaxed">
-                    {part.issue}
-                  </p>
-
-                  <div className="text-[11px] bg-white/80 dark:bg-black/40 p-2 rounded-lg text-zinc-700 dark:text-zinc-300 border border-black/[0.04] dark:border-white/[0.06]">
-                    <span className="font-semibold text-zinc-900 dark:text-zinc-100">Advice: </span>
-                    {part.suggestion}
-                  </div>
-
-                  {onFixIssue && (
-                    <div className="pt-1 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => onFixIssue(part)}
-                        disabled={isFixing}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-[11px] shadow-sm transition-all disabled:opacity-50"
-                      >
-                        {isFixing ? (
-                          <>
-                            <RefreshCw size={12} className="animate-spin" />
-                            <span>Fixing with AI...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles size={12} />
-                            <span>{part.actionLabel || "Fix with AI"}</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Strengths / What's Working (Good Parts) */}
-      {(activeTab === "all" || activeTab === "good") && goodParts.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-              <CheckCircle2 size={14} />
-              <span>ATS Strengths & Passed Checks ({goodParts.length})</span>
-            </span>
-          </div>
-
-          <div className="space-y-2">
-            {goodParts.map((part) => (
-              <div
-                key={part.id}
-                className="p-3 rounded-xl border border-emerald-200/80 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/20 text-xs space-y-1"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="font-semibold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
-                    <span className="text-emerald-500">✓</span>
-                    <span>{part.title}</span>
-                  </div>
-                  {part.points && (
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold shrink-0">
-                      +{part.points} pts
-                    </span>
-                  )}
-                </div>
-                <p className="text-zinc-600 dark:text-zinc-400 text-[11px] leading-relaxed">
-                  {part.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Target Job Keywords */}
-      {(matchedKeywords.length > 0 || missingKeywords.length > 0) && (
-        <div className="p-3.5 rounded-2xl bg-black/[0.02] dark:bg-zinc-900/80 border border-black/[0.06] dark:border-white/[0.08] space-y-2.5">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-semibold text-[#1a1a1a] dark:text-zinc-100">
-              Industry Keyword Alignment
-            </span>
-            <span className="text-[10px] text-purple-500 font-mono font-bold">
-              {matchedKeywords.length} Detected
-            </span>
-          </div>
-
-          <div className="flex flex-wrap gap-1">
-            {matchedKeywords.map((kw) => (
-              <span
-                key={kw}
-                className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 flex items-center gap-1 font-mono font-medium"
-              >
-                <span>✓</span> {kw}
+        {/* Overall Score Dial Card */}
+        <div className="p-4 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 text-white border border-white/10 text-center shadow-lg relative overflow-hidden">
+          <div className="relative inline-flex items-center justify-center my-1">
+            <svg className="w-24 h-24 transform -rotate-90">
+              <circle
+                cx="48"
+                cy="48"
+                r="38"
+                stroke="#1e293b"
+                strokeWidth="7"
+                fill="transparent"
+              />
+              <circle
+                cx="48"
+                cy="48"
+                r="38"
+                className={scoreColor}
+                strokeWidth="7"
+                fill="transparent"
+                strokeDasharray="238"
+                strokeDashoffset={
+                  238 - (238 * Math.min(100, Math.max(0, score))) / 100
+                }
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className="absolute flex flex-col items-center">
+              <span className="text-2xl font-extrabold text-white font-mono">
+                {score}
               </span>
-            ))}
-            {missingKeywords.map((kw) => (
-              <button
-                key={kw}
-                type="button"
-                onClick={() => onAddKeyword && onAddKeyword(kw)}
-                className="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 border border-amber-500/30 flex items-center gap-1 font-mono cursor-pointer transition"
-                title="Click to suggest adding to skills"
-              >
-                <span>+</span> {kw}
-              </button>
-            ))}
+              <span className="text-[9px] text-slate-400 uppercase font-semibold">
+                ATS Score
+              </span>
+            </div>
+          </div>
+
+          <div
+            className={`mt-1.5 text-xs font-semibold px-3 py-1 rounded-full border inline-block ${scoreBgBadge}`}
+          >
+            {scoreLabel}
           </div>
         </div>
-      )}
+
+        {/* Filter Tabs: All, Needs Improvement, Strengths */}
+        <div className="flex rounded-xl bg-black/[0.04] dark:bg-white/[0.06] p-1 text-xs font-semibold">
+          <button
+            type="button"
+            onClick={() => setActiveTab("all")}
+            className={`flex-1 py-1.5 rounded-lg transition-all ${
+              activeTab === "all"
+                ? "bg-white dark:bg-zinc-800 text-[#1a1a1a] dark:text-white shadow-sm"
+                : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+            }`}
+          >
+            All ({badParts.length + goodParts.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("bad")}
+            className={`flex-1 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 ${
+              activeTab === "bad"
+                ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 shadow-sm"
+                : "text-zinc-500 hover:text-rose-600 dark:hover:text-rose-400"
+            }`}
+          >
+            <span>Fix</span>
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500 text-white font-mono">
+              {badParts.length}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("good")}
+            className={`flex-1 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 ${
+              activeTab === "good"
+                ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 shadow-sm"
+                : "text-zinc-500 hover:text-emerald-600 dark:hover:text-emerald-400"
+            }`}
+          >
+            <span>Passed</span>
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-600 text-white font-mono">
+              {goodParts.length}
+            </span>
+          </button>
+        </div>
+
+        {/* Areas to Improve (Bad Parts) with 1-Click AI Fix */}
+        {(activeTab === "all" || activeTab === "bad") &&
+          badParts.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+                  <AlertTriangle size={14} />
+                  <span>Critical ATS Deficiencies ({badParts.length})</span>
+                </span>
+              </div>
+
+              <div className="space-y-2.5">
+                {badParts.map((part) => {
+                  const isFixing = fixingPartId === part.id;
+                  return (
+                    <div
+                      key={part.id}
+                      className="p-3.5 rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/50 dark:bg-rose-950/20 text-xs space-y-2 relative group transition-all"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="font-bold text-rose-950 dark:text-rose-200">
+                          {part.title}
+                        </div>
+                        {part.pointsLost && (
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-700 dark:text-rose-300 font-bold shrink-0">
+                            -{part.pointsLost} pts
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-zinc-600 dark:text-zinc-300 text-[11px] leading-relaxed">
+                        {part.issue}
+                      </p>
+
+                      <div className="text-[11px] bg-white/80 dark:bg-black/40 p-2 rounded-lg text-zinc-700 dark:text-zinc-300 border border-black/[0.04] dark:border-white/[0.06]">
+                        <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                          Advice:{" "}
+                        </span>
+                        {part.suggestion}
+                      </div>
+
+                      {onFixIssue && (
+                        <div className="pt-1 flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => onFixIssue(part)}
+                            disabled={isFixing}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#9fff00] text-[#1a1a1a] hover:bg-[#8fee00] text-white font-semibold text-[11px] shadow-sm transition-all disabled:opacity-50"
+                          >
+                            {isFixing ? (
+                              <>
+                                <RefreshCw size={12} className="animate-spin" />
+                                <span>Fixing with AI...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles size={12} />
+                                <span>{part.actionLabel || "Fix with AI"}</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+        {/* Strengths / What's Working (Good Parts) */}
+        {(activeTab === "all" || activeTab === "good") &&
+          goodParts.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                  <CheckCircle2 size={14} />
+                  <span>
+                    ATS Strengths & Passed Checks ({goodParts.length})
+                  </span>
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                {goodParts.map((part) => (
+                  <div
+                    key={part.id}
+                    className="p-3 rounded-xl border border-emerald-200/80 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/20 text-xs space-y-1"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="font-semibold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
+                        <span className="text-emerald-500">✓</span>
+                        <span>{part.title}</span>
+                      </div>
+                      {part.points && (
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold shrink-0">
+                          +{part.points} pts
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-zinc-600 dark:text-zinc-400 text-[11px] leading-relaxed">
+                      {part.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        {/* Target Job Keywords */}
+        {(matchedKeywords.length > 0 || missingKeywords.length > 0) && (
+          <div className="p-3.5 rounded-2xl bg-black/[0.02] dark:bg-zinc-900/80 border border-black/[0.06] dark:border-white/[0.08] space-y-2.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-[#1a1a1a] dark:text-zinc-100">
+                Industry Keyword Alignment
+              </span>
+              <span className="text-[10px] text-[#9fff00] font-mono font-bold">
+                {matchedKeywords.length} Detected
+              </span>
+            </div>
+
+            <div className="flex flex-wrap gap-1">
+              {matchedKeywords.map((kw) => (
+                <span
+                  key={kw}
+                  className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 flex items-center gap-1 font-mono font-medium"
+                >
+                  <span>✓</span> {kw}
+                </span>
+              ))}
+              {missingKeywords.map((kw) => (
+                <button
+                  key={kw}
+                  type="button"
+                  onClick={() => onAddKeyword && onAddKeyword(kw)}
+                  className="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 border border-amber-500/30 flex items-center gap-1 font-mono cursor-pointer transition"
+                  title="Click to suggest adding to skills"
+                >
+                  <span>+</span> {kw}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -626,6 +634,38 @@ function parseActionEnvelopes(rawContent) {
   }
   const cleanText = rawContent.replace(actionRegex, "").trim();
   return { cleanText, actions };
+}
+
+function hasActualPatchData(patch) {
+  if (!patch || typeof patch !== "object") return false;
+  if (Object.keys(patch).length === 0) return false;
+  if (Array.isArray(patch)) return patch.length > 0;
+  return !!(
+    (typeof patch.summary === "string" && patch.summary.trim().length > 10) ||
+    (Array.isArray(patch.sections) && patch.sections.length > 0) ||
+    (Array.isArray(patch.workExperience || patch.work || patch.experience) &&
+      (patch.workExperience || patch.work || patch.experience).length > 0) ||
+    (Array.isArray(patch.education) && patch.education.length > 0) ||
+    (Array.isArray(patch.projects) && patch.projects.length > 0) ||
+    (patch.skills &&
+      (Array.isArray(patch.skills)
+        ? patch.skills.length > 0
+        : Object.keys(patch.skills).length > 0)) ||
+    patch.personal?.fullName ||
+    patch.personalInfo?.fullName ||
+    patch.basics?.name
+  );
+}
+
+function hasStructuredResumeMarkdown(content) {
+  if (!content || typeof content !== "string") return false;
+  let matches = 0;
+  if (/###\s*Contact/i.test(content) || /\*\*Full\s*Name\*\*/i.test(content)) matches++;
+  if (/###\s*Summary/i.test(content)) matches++;
+  if (/###\s*Education/i.test(content)) matches++;
+  if (/###\s*(?:Systems\s*&\s*Engineering\s*)?Projects/i.test(content)) matches++;
+  if (/###\s*Technical\s*Skills/i.test(content) || /###\s*Skills/i.test(content)) matches++;
+  return matches >= 2;
 }
 
 function getActionTitle(actionName) {
@@ -658,10 +698,13 @@ function renderActionPreview(actionName, payload) {
       return (
         <div>
           <div className="font-bold text-zinc-900 dark:text-zinc-100">
-            {payload.fullName || "Candidate"} {payload.targetTitle ? `• ${payload.targetTitle}` : ""}
+            {payload.fullName || "Candidate"}{" "}
+            {payload.targetTitle ? `• ${payload.targetTitle}` : ""}
           </div>
           <div className="text-zinc-500 dark:text-zinc-400 text-[10px] mt-0.5">
-            {[payload.email, payload.phone, payload.location].filter(Boolean).join(" | ")}
+            {[payload.email, payload.phone, payload.location]
+              .filter(Boolean)
+              .join(" | ")}
           </div>
           {(payload.linkedin || payload.website) && (
             <div className="text-zinc-400 dark:text-zinc-500 text-[10px] mt-0.5 truncate">
@@ -671,17 +714,20 @@ function renderActionPreview(actionName, payload) {
         </div>
       );
     case "updateSummary":
-      return (
-        <div className="italic leading-relaxed">
-          "{payload.summary}"
-        </div>
-      );
+      return <div className="italic leading-relaxed">"{payload.summary}"</div>;
     case "addExperience":
       return (
         <div>
           <div className="font-bold text-zinc-900 dark:text-zinc-100">
-            {payload.role || payload.position} {payload.company ? `at ${payload.company}` : ""}
-            {payload.dates ? <span className="text-zinc-400 font-normal ml-1">({payload.dates})</span> : ""}
+            {payload.role || payload.position}{" "}
+            {payload.company ? `at ${payload.company}` : ""}
+            {payload.dates ? (
+              <span className="text-zinc-400 font-normal ml-1">
+                ({payload.dates})
+              </span>
+            ) : (
+              ""
+            )}
           </div>
           {Array.isArray(payload.bullets) && payload.bullets.length > 0 && (
             <ul className="list-disc list-inside mt-1 space-y-0.5 text-zinc-600 dark:text-zinc-300 text-[10px]">
@@ -697,19 +743,25 @@ function renderActionPreview(actionName, payload) {
         <div className="space-y-1">
           {Array.isArray(payload.technical) && payload.technical.length > 0 && (
             <div>
-              <span className="font-semibold text-zinc-800 dark:text-zinc-200">Tech: </span>
+              <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                Tech:{" "}
+              </span>
               <span>{payload.technical.join(", ")}</span>
             </div>
           )}
           {Array.isArray(payload.tools) && payload.tools.length > 0 && (
             <div>
-              <span className="font-semibold text-zinc-800 dark:text-zinc-200">Tools: </span>
+              <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                Tools:{" "}
+              </span>
               <span>{payload.tools.join(", ")}</span>
             </div>
           )}
           {Array.isArray(payload.soft) && payload.soft.length > 0 && (
             <div>
-              <span className="font-semibold text-zinc-800 dark:text-zinc-200">Soft Skills: </span>
+              <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                Soft Skills:{" "}
+              </span>
               <span>{payload.soft.join(", ")}</span>
             </div>
           )}
@@ -722,7 +774,11 @@ function renderActionPreview(actionName, payload) {
             {payload.name || payload.title || "Project"}
             {payload.technologies ? (
               <span className="text-zinc-400 font-normal ml-1">
-                ({Array.isArray(payload.technologies) ? payload.technologies.join(", ") : payload.technologies})
+                (
+                {Array.isArray(payload.technologies)
+                  ? payload.technologies.join(", ")
+                  : payload.technologies}
+                )
               </span>
             ) : null}
           </div>
@@ -732,7 +788,7 @@ function renderActionPreview(actionName, payload) {
             </div>
           )}
           {payload.url && (
-            <div className="text-purple-600 dark:text-purple-400 text-[10px] mt-0.5 truncate">
+            <div className="text-[#9fff00] dark:text-[#9fff00] text-[10px] mt-0.5 truncate">
               {payload.url}
             </div>
           )}
@@ -742,10 +798,13 @@ function renderActionPreview(actionName, payload) {
       return (
         <div>
           <div className="font-bold text-zinc-900 dark:text-zinc-100">
-            {payload.degree || payload.studyType || "Degree"} {payload.institution ? `at ${payload.institution}` : ""}
+            {payload.degree || payload.studyType || "Degree"}{" "}
+            {payload.institution ? `at ${payload.institution}` : ""}
           </div>
           <div className="text-zinc-500 dark:text-zinc-400 text-[10px]">
-            {[payload.area, payload.startDate, payload.endDate || payload.dates].filter(Boolean).join(" • ")}
+            {[payload.area, payload.startDate, payload.endDate || payload.dates]
+              .filter(Boolean)
+              .join(" • ")}
           </div>
         </div>
       );
@@ -756,15 +815,37 @@ function renderActionPreview(actionName, payload) {
             ⚡ Full Complete Resume Blueprint
           </div>
           <div className="text-zinc-600 dark:text-zinc-300 text-[10px] space-y-0.5">
-            {payload.personal?.fullName && <div>• <strong>Candidate:</strong> {payload.personal.fullName} ({payload.personal.targetTitle || "Engineer"})</div>}
-            {Array.isArray(payload.workExperience) && <div>• <strong>Experience:</strong> {payload.workExperience.length} roles ready</div>}
-            {Array.isArray(payload.projects) && <div>• <strong>Projects:</strong> {payload.projects.length} key projects ready</div>}
-            {Array.isArray(payload.education) && <div>• <strong>Education:</strong> {payload.education.length} credentials ready</div>}
+            {payload.personal?.fullName && (
+              <div>
+                • <strong>Candidate:</strong> {payload.personal.fullName} (
+                {payload.personal.targetTitle || "Engineer"})
+              </div>
+            )}
+            {Array.isArray(payload.workExperience) && (
+              <div>
+                • <strong>Experience:</strong> {payload.workExperience.length}{" "}
+                roles ready
+              </div>
+            )}
+            {Array.isArray(payload.projects) && (
+              <div>
+                • <strong>Projects:</strong> {payload.projects.length} key
+                projects ready
+              </div>
+            )}
+            {Array.isArray(payload.education) && (
+              <div>
+                • <strong>Education:</strong> {payload.education.length}{" "}
+                credentials ready
+              </div>
+            )}
           </div>
         </div>
       );
     default:
-      return <pre className="text-[10px]">{JSON.stringify(payload, null, 2)}</pre>;
+      return (
+        <pre className="text-[10px]">{JSON.stringify(payload, null, 2)}</pre>
+      );
   }
 }
 
@@ -802,10 +883,26 @@ export function AiAssistantDrawer({
   if (!isOpen) return null;
 
   const quickPrompts = [
-    { label: "✨ Add metrics to work bullets", prompt: "Enrich all my work experience bullets with measurable metrics, percentages, and strong action verbs." },
-    { label: "🎯 Tailor for Senior Engineer", prompt: "Tailor my resume summary and key skills for a Senior Software Engineer / Full Stack role." },
-    { label: "💼 Elevate Executive Summary", prompt: "Write a high-impact executive professional summary that commands recruiter attention." },
-    { label: "⚡ Suggest Top 10 Keywords", prompt: "Suggest the top 10 most in-demand technical keywords and frameworks for my role." },
+    {
+      label: "✨ Add metrics to work bullets",
+      prompt:
+        "Enrich all my work experience bullets with measurable metrics, percentages, and strong action verbs.",
+    },
+    {
+      label: "🎯 Tailor for Senior Engineer",
+      prompt:
+        "Tailor my resume summary and key skills for a Senior Software Engineer / Full Stack role.",
+    },
+    {
+      label: "💼 Elevate Executive Summary",
+      prompt:
+        "Write a high-impact executive professional summary that commands recruiter attention.",
+    },
+    {
+      label: "⚡ Suggest Top 10 Keywords",
+      prompt:
+        "Suggest the top 10 most in-demand technical keywords and frameworks for my role.",
+    },
   ];
 
   const handleSend = async (textToSend) => {
@@ -820,11 +917,20 @@ export function AiAssistantDrawer({
 
     try {
       // Calculate current resume draft state
-      const hasContact = !!(resumeData?.basics?.name && (resumeData?.basics?.email || resumeData?.basics?.phone));
-      const hasSummary = !!(resumeData?.basics?.summary && resumeData.basics.summary.length > 20);
-      const experienceCount = Array.isArray(resumeData?.work) ? resumeData.work.length : 0;
-      const hasEducation = Array.isArray(resumeData?.education) && resumeData.education.length > 0;
-      const hasSkills = Array.isArray(resumeData?.skills) && resumeData.skills.length > 0;
+      const hasContact = !!(
+        resumeData?.basics?.name &&
+        (resumeData?.basics?.email || resumeData?.basics?.phone)
+      );
+      const hasSummary = !!(
+        resumeData?.basics?.summary && resumeData.basics.summary.length > 20
+      );
+      const experienceCount = Array.isArray(resumeData?.work)
+        ? resumeData.work.length
+        : 0;
+      const hasEducation =
+        Array.isArray(resumeData?.education) && resumeData.education.length > 0;
+      const hasSkills =
+        Array.isArray(resumeData?.skills) && resumeData.skills.length > 0;
 
       // Call backend AI route with scope 'chat-assistant'
       const { data } = await api.post("/ai", {
@@ -869,7 +975,7 @@ export function AiAssistantDrawer({
       {/* Header */}
       <div className="p-4 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between shrink-0 bg-white dark:bg-[#141417]">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
+          <div className="p-1.5 rounded-lg bg-[#9fff00]/10 text-[#9fff00] dark:text-[#9fff00]">
             <Sparkles size={16} />
           </div>
           <div>
@@ -907,14 +1013,14 @@ export function AiAssistantDrawer({
               className={`flex gap-2.5 ${isUser ? "justify-end" : "justify-start"}`}
             >
               {!isUser && (
-                <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white shrink-0 shadow-sm mt-0.5">
-                  <Bot size={13} />
+                <div className="w-6 h-6 rounded-full bg-[#9fff00] flex items-center justify-center text-[#1a1a1a] shrink-0 shadow-sm mt-0.5">
+                  <Bot size={13} className="text-[#1a1a1a]" />
                 </div>
               )}
               <div
                 className={`max-w-[85%] rounded-2xl p-3 leading-relaxed shadow-sm ${
                   isUser
-                    ? "bg-purple-600 text-white rounded-br-none"
+                    ? "bg-[#1a1a1a] dark:bg-[#9fff00] text-white dark:text-black font-medium rounded-br-none"
                     : "bg-black/[0.03] dark:bg-white/[0.06] text-zinc-800 dark:text-zinc-200 border border-black/[0.04] dark:border-white/[0.06] rounded-bl-none"
                 }`}
               >
@@ -924,9 +1030,9 @@ export function AiAssistantDrawer({
 
                 {/* 1-Click Apply All Action Cards Banner */}
                 {actions.length > 1 && (
-                  <div className="mt-3 p-3 rounded-xl bg-gradient-to-r from-purple-600/15 via-indigo-600/15 to-purple-600/15 border border-purple-500/40 flex items-center justify-between gap-3 shadow-xs">
+                  <div className="mt-3 p-3 rounded-xl bg-zinc-900/50 border border-[#9fff00]/40 flex items-center justify-between gap-3 shadow-xs">
                     <div>
-                      <div className="text-xs font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
+                      <div className="text-xs font-bold text-[#1a1a1a] dark:text-[#9fff00] flex items-center gap-1.5">
                         <Sparkles size={13} />
                         <span>{actions.length} Sections Ready</span>
                       </div>
@@ -939,10 +1045,12 @@ export function AiAssistantDrawer({
                       onClick={() => {
                         actions.forEach((act, aIdx) => {
                           onApplyActionEnvelope?.(act.actionName, act.payload);
-                          setAppliedActionKeys((prev) => new Set(prev).add(`${idx}-${aIdx}`));
+                          setAppliedActionKeys((prev) =>
+                            new Set(prev).add(`${idx}-${aIdx}`),
+                          );
                         });
                       }}
-                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white shadow transition flex items-center gap-1.5 cursor-pointer shrink-0"
+                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#1a1a1a] dark:bg-[#9fff00] hover:bg-black dark:hover:bg-[#8ee600] text-white dark:text-black shadow transition flex items-center gap-1.5 cursor-pointer shrink-0"
                     >
                       <Wand2 size={12} />
                       <span>Apply All</span>
@@ -957,14 +1065,14 @@ export function AiAssistantDrawer({
                   return (
                     <div
                       key={aIdx}
-                      className="mt-3 p-3 rounded-xl bg-purple-500/10 dark:bg-purple-950/40 border border-purple-500/30 text-left space-y-2"
+                      className="mt-3 p-3 rounded-xl bg-[#9fff00]/10 dark:bg-[#9fff00]/10 border border-[#9fff00]/30 text-left space-y-2"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
+                        <span className="text-[11px] font-bold text-[#1a1a1a] dark:text-[#9fff00] flex items-center gap-1.5">
                           <Sparkles size={12} />
                           <span>{getActionTitle(act.actionName)}</span>
                         </span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-600 dark:text-purple-300">
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#9fff00]/20 text-[#1a1a1a] dark:text-[#9fff00]">
                           Interactive Card
                         </span>
                       </div>
@@ -978,13 +1086,18 @@ export function AiAssistantDrawer({
                           type="button"
                           disabled={isActionApplied}
                           onClick={() => {
-                            onApplyActionEnvelope?.(act.actionName, act.payload);
-                            setAppliedActionKeys((prev) => new Set(prev).add(actionKey));
+                            onApplyActionEnvelope?.(
+                              act.actionName,
+                              act.payload,
+                            );
+                            setAppliedActionKeys((prev) =>
+                              new Set(prev).add(actionKey),
+                            );
                           }}
                           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
                             isActionApplied
                               ? "bg-emerald-600 text-white cursor-default"
-                              : "bg-purple-600 hover:bg-purple-700 text-white shadow-sm cursor-pointer"
+                              : "bg-[#1a1a1a] dark:bg-[#9fff00] hover:bg-black dark:hover:bg-[#8ee600] text-white dark:text-black shadow-sm cursor-pointer"
                           }`}
                         >
                           {isActionApplied ? (
@@ -1004,23 +1117,37 @@ export function AiAssistantDrawer({
                   );
                 })}
 
-                {/* Optional Legacy Patch Apply Button */}
-                {msg.patch && onApplyPatch && (
+                {/* Apply Button for Direct Patch or Structured AI Markdown (only when real data exists and no action cards present) */}
+                {!isUser && actions.length === 0 && (hasActualPatchData(msg.patch) || hasStructuredResumeMarkdown(msg.content)) && onApplyPatch && (
                   <div className="mt-3 pt-2.5 border-t border-black/[0.08] dark:border-white/[0.08] flex items-center justify-between gap-2">
-                    <span className="text-[11px] font-semibold text-purple-600 dark:text-purple-400">
-                      {appliedIndices.has(idx) ? "Patch applied to resume!" : "Ready to apply to canvas:"}
+                    <span className="text-[11px] font-semibold text-zinc-800 dark:text-[#9fff00]">
+                      {appliedIndices.has(idx)
+                        ? "Applied to resume canvas!"
+                        : "Ready to apply to canvas:"}
                     </span>
                     <button
                       type="button"
                       onClick={() => {
-                        onApplyPatch(msg.patch);
+                        if (actions && actions.length > 0) {
+                          actions.forEach((act, aIdx) => {
+                            onApplyActionEnvelope?.(act.actionName, act.payload);
+                            setAppliedActionKeys((prev) =>
+                              new Set(prev).add(`${idx}-${aIdx}`),
+                            );
+                          });
+                        }
+                        if (msg.patch) {
+                          onApplyPatch(msg.patch);
+                        } else if (msg.content) {
+                          onApplyPatch(msg.content);
+                        }
                         setAppliedIndices((prev) => new Set(prev).add(idx));
                       }}
                       disabled={appliedIndices.has(idx)}
-                      className={`px-2.5 py-1 rounded-md text-white font-semibold text-[11px] shadow transition flex items-center gap-1 shrink-0 ${
+                      className={`px-2.5 py-1 rounded-md font-semibold text-[11px] shadow transition flex items-center gap-1 shrink-0 ${
                         appliedIndices.has(idx)
-                          ? "bg-emerald-600 cursor-default"
-                          : "bg-purple-600 hover:bg-purple-500 cursor-pointer"
+                          ? "bg-emerald-600 text-white cursor-default"
+                          : "bg-[#1a1a1a] dark:bg-[#9fff00] text-white dark:text-black hover:bg-black dark:hover:bg-[#8ee600] cursor-pointer"
                       }`}
                     >
                       {appliedIndices.has(idx) ? (
@@ -1049,7 +1176,7 @@ export function AiAssistantDrawer({
 
         {loading && (
           <div className="flex gap-2.5 items-center text-zinc-400 text-xs pl-2">
-            <Bot size={14} className="animate-spin text-purple-500" />
+            <Bot size={14} className="animate-spin text-[#9fff00]" />
             <span>AI Copilot is analyzing and writing...</span>
           </div>
         )}
@@ -1064,7 +1191,7 @@ export function AiAssistantDrawer({
             type="button"
             disabled={loading}
             onClick={() => handleSend(qp.prompt)}
-            className="whitespace-nowrap px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60 text-[11px] font-medium hover:bg-purple-100 transition disabled:opacity-40 shrink-0"
+            className="whitespace-nowrap px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-[#9fff00]/10 text-[#1a1a1a] dark:text-[#9fff00] border border-[#9fff00]/50 dark:border-[#9fff00]/60 text-[11px] font-medium hover:bg-zinc-200 transition disabled:opacity-40 shrink-0"
           >
             {qp.label}
           </button>
@@ -1086,12 +1213,12 @@ export function AiAssistantDrawer({
             onChange={(e) => setInput(e.target.value)}
             disabled={loading}
             placeholder="Ask AI to tailor, rewrite, or optimize..."
-            className="flex-1 text-xs px-3 py-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.08] dark:border-white/[0.1] text-[#1a1a1a] dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-purple-500/40"
+            className="flex-1 text-xs px-3 py-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.08] dark:border-white/[0.1] text-[#1a1a1a] dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#9fff00]/40"
           />
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="p-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition disabled:opacity-40 shadow-sm"
+            className="p-2 rounded-xl bg-[#1a1a1a] dark:bg-[#9fff00] hover:bg-black dark:hover:bg-[#8ee600] text-white dark:text-black transition disabled:opacity-40 shadow-sm"
             title="Send"
           >
             <Send size={14} />
@@ -1101,4 +1228,3 @@ export function AiAssistantDrawer({
     </div>
   );
 }
-

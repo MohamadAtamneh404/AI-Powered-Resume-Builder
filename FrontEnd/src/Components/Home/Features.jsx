@@ -17,7 +17,12 @@ const bentoCards = [
       "Enterprise ATS screeners (Workday, Greenhouse, Taleo) choke on complex tables, multi-column grids, and floating text boxes. Our layouts are strictly engineered to parse with zero data loss.",
     metric: "99.4%",
     metricLabel: "First-Pass Parse Guarantee",
-    icon: <ShieldCheck className="text-[#1a1a1a] dark:text-zinc-100 group-hover:text-black" size={28} />,
+    icon: (
+      <ShieldCheck
+        className="text-[#1a1a1a] dark:text-zinc-100 group-hover:text-black"
+        size={28}
+      />
+    ),
     accent: "bg-[#9fff00]",
   },
   {
@@ -28,7 +33,12 @@ const bentoCards = [
       "Instantly transforms passive duties into high-impact outcome bullets with strong action verbs and verified metrics.",
     metric: "3.2x",
     metricLabel: "More Recruiter Callbacks",
-    icon: <Sparkles className="text-[#1a1a1a] dark:text-zinc-100 group-hover:text-black" size={28} />,
+    icon: (
+      <Sparkles
+        className="text-[#1a1a1a] dark:text-zinc-100 group-hover:text-black"
+        size={28}
+      />
+    ),
     accent: "bg-white",
   },
   {
@@ -39,7 +49,12 @@ const bentoCards = [
       "Paste any target job description to automatically extract missing technical skills and experience keywords in seconds.",
     metric: "12+",
     metricLabel: "Keywords Detected / Scan",
-    icon: <BrainCircuit className="text-[#1a1a1a] dark:text-zinc-100 group-hover:text-black" size={28} />,
+    icon: (
+      <BrainCircuit
+        className="text-[#1a1a1a] dark:text-zinc-100 group-hover:text-black"
+        size={28}
+      />
+    ),
     accent: "bg-white",
   },
   {
@@ -50,7 +65,12 @@ const bentoCards = [
       "Engineered directly with precision text vector glyphs so human hiring managers see razor-sharp typography while scrapers read clean semantic ASCII.",
     metric: "0.1s",
     metricLabel: "Instant Client-Side Render",
-    icon: <FileCheck2 className="text-[#1a1a1a] dark:text-zinc-100 group-hover:text-black" size={28} />,
+    icon: (
+      <FileCheck2
+        className="text-[#1a1a1a] dark:text-zinc-100 group-hover:text-black"
+        size={28}
+      />
+    ),
     accent: "bg-[#9fff00]",
   },
 ];
@@ -67,7 +87,10 @@ export default function Features() {
           </span>
           <h2 className="font-['Outfit'] text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#1a1a1a] dark:text-zinc-100 leading-tight">
             Engineered for{" "}
-            <span className="text-[#8e8e8e] dark:text-zinc-400">100% ATS Pass Rate</span>.
+            <span className="text-[#8e8e8e] dark:text-zinc-400">
+              100% ATS Pass Rate
+            </span>
+            .
           </h2>
         </div>
         <p className="text-sm md:text-base text-[#8e8e8e] dark:text-zinc-400 max-w-md font-sans leading-relaxed">

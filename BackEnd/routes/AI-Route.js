@@ -588,7 +588,11 @@ router.post("/", optionalAuthenticateToken, async (req, res) => {
     toneDirective += ` Target ATS keyword density: ${copilotPref.keywordDensity}%.`;
   }
 
-  const customModels = copilotPref.aiModel === "gpt-4o"
+  const customModels = copilotPref.aiModel === "groq-llama-70b"
+    ? ["llama-3.3-70b-versatile", "meta-llama/llama-3.3-70b-instruct:free", "google/gemini-2.0-flash-exp:free"]
+    : copilotPref.aiModel === "aion-3.5"
+    ? ["aion-labs/aion-3.5", "google/gemini-2.0-flash-exp:free", "openai/gpt-4o-mini"]
+    : copilotPref.aiModel === "gpt-4o"
     ? ["openai/gpt-4o-mini", "google/gemini-2.5-flash", "deepseek/deepseek-chat"]
     : undefined;
 
@@ -865,6 +869,184 @@ router.post("/", optionalAuthenticateToken, async (req, res) => {
       return res.json({ skills });
     }
 
+function parseMarkdownToPatch(text) {
+  if (!text || typeof text !== "string") return null;
+
+  const patch = {
+    personal: {},
+    summary: "",
+    education: [],
+    projects: [],
+    workExperience: [],
+    skills: {},
+  };
+
+  const cleanVal = (val) => {
+    if (!val) return "";
+    let s = val.trim();
+    const linkMatch = s.match(/\[([^\]]+)\]\(([^)]+)\)/);
+    if (linkMatch) return linkMatch[2] || linkMatch[1];
+    s = s.replace(/^[-*•]\s*/, "");
+    return s.trim();
+  };
+
+  // Personal Info
+  const nameMatch = text.match(/\*\*(?:Full\s*Name|Name):?\*\*:?\s*([^\n\r]+)/i);
+  if (nameMatch) patch.personal.fullName = cleanVal(nameMatch[1]);
+
+  const titleMatch = text.match(/\*\*(?:Target\s*Title|Title|Headliner|Headline|Role):?\*\*:?\s*([^\n\r]+)/i);
+  if (titleMatch) patch.personal.targetTitle = cleanVal(titleMatch[1]);
+
+  const emailMatch = text.match(/\*\*(?:Email):?\*\*:?\s*([^\n\r]+)/i);
+  if (emailMatch) patch.personal.email = cleanVal(emailMatch[1]);
+
+  const phoneMatch = text.match(/\*\*(?:Mobile|Phone|Tel|Phone\s*Number):?\*\*:?\s*([^\n\r]+)/i);
+  if (phoneMatch) patch.personal.phone = cleanVal(phoneMatch[1]);
+
+  const locMatch = text.match(/\*\*(?:Location|Address|City|Country):?\*\*:?\s*([^\n\r]+)/i);
+  if (locMatch) patch.personal.location = cleanVal(locMatch[1]);
+
+  const liMatch = text.match(/\*\*(?:LinkedIn):?\*\*:?\s*([^\n\r]+)/i);
+  if (liMatch) patch.personal.linkedin = cleanVal(liMatch[1]);
+
+  const ghMatch = text.match(/\*\*(?:GitHub):?\*\*:?\s*([^\n\r]+)/i);
+  if (ghMatch) patch.personal.github = cleanVal(ghMatch[1]);
+
+  const portMatch = text.match(/\*\*(?:Portfolio|Website|Site):?\*\*:?\s*([^\n\r]+)/i);
+  if (portMatch) patch.personal.website = cleanVal(portMatch[1]);
+
+  // Summary
+  const summaryMatch = text.match(/###\s*(?:Professional\s*|Executive\s*)?Summary[\s\S]*?(?:-\s*\*\*Summary:?\*\*:\s*([^\n\r]+(?:[\n\r]+(?!###)[^\n\r]+)*)|([^\n\r#]+(?:[\n\r]+(?!###)[^\n\r]+)*))/i);
+  if (summaryMatch) {
+    const rawSumm = (summaryMatch[1] || summaryMatch[2] || "").trim();
+    patch.summary = rawSumm.replace(/^-\s*\*\*Summary:?\*\*:\s*/i, "").trim();
+  }
+
+  // Education
+  const eduSection = text.match(/###\s*Education([\s\S]*?)(?=###|$)/i);
+  if (eduSection) {
+    const eduText = eduSection[1].trim();
+    const instMatch = eduText.match(/\*\*Institution:?\*\*:\s*([^\n\r]+)/i);
+    const degMatch = eduText.match(/\*\*Degree:?\*\*:\s*([^\n\r]+)/i);
+    if (instMatch || degMatch) {
+      const durMatch = eduText.match(/\*\*Duration:?\*\*:\s*([^\n\r]+)/i);
+      const detMatch = eduText.match(/\*\*Details:?\*\*:\s*([^\n\r]+(?:[\n\r]+(?!-|\*\*)[^\n\r]+)*)/i);
+      const dur = durMatch ? durMatch[1].trim() : "";
+      patch.education.push({
+        institution: instMatch ? instMatch[1].trim() : "",
+        degree: degMatch ? degMatch[1].trim() : "",
+        graduationYear: dur,
+        summary: detMatch ? detMatch[1].trim() : "",
+      });
+    } else {
+      const eduBlocks = eduText
+        .split(/(?=\n\s*[-*•]\s*\*\*|\n\s*\*\*[A-Z])/i)
+        .map((b) => b.trim())
+        .filter((b) => b.length > 5);
+
+      for (const block of eduBlocks) {
+        const headerMatch = block.match(/(?:[-*•]\s*)?\*\*([^*]+)\*\*/);
+        const institution = headerMatch ? headerMatch[1].trim() : "";
+        const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
+        let degree = "";
+        let graduationYear = "";
+        const highlights = [];
+
+        for (const line of lines.slice(1)) {
+          const italicMatch = line.match(/^\*([^*]+)\*$/);
+          const lineContent = italicMatch ? italicMatch[1] : line;
+          const dateMatch = lineContent.match(/\(([^)]*(?:19|20)\d{2}[^)]*)\)/);
+          if (dateMatch) graduationYear = dateMatch[1];
+
+          if (/B\.Sc|M\.Sc|Bachelor|Master|Ph\.D|Associate|Degree|B\.A|M\.A/i.test(lineContent)) {
+            degree = lineContent.replace(/\([^)]*\)/, "").trim();
+          } else {
+            highlights.push(lineContent);
+          }
+        }
+        if (institution || degree) {
+          patch.education.push({
+            institution,
+            degree: degree || "B.Sc.",
+            graduationYear,
+            summary: highlights.join("\n"),
+          });
+        }
+      }
+    }
+  }
+
+  // Projects
+  const projSection = text.match(/###\s*(?:Systems\s*&\s*Engineering\s*|Key\s*|Featured\s*)?Projects([\s\S]*?)(?=###|$)/i);
+  if (projSection) {
+    const projText = projSection[1].trim();
+    const projBlocks = projText
+      .split(/(?=\n\s*[-*•]\s*\*\*|\n\s*\d+\.\s*\*\*|\n\s*\*\*[A-Z0-9])/i)
+      .map((b) => b.trim())
+      .filter((b) => b.length > 5);
+
+    for (const b of projBlocks) {
+      const titleMatch = b.match(/(?:[-*•\d.]+\s*)?\*\*([^*]+)\*\*/);
+      if (!titleMatch) continue;
+      const name = titleMatch[1].trim();
+
+      let technologies = [];
+      let subtitle = "";
+      const techItalic = b.match(/(?:^|\n)\s*\*([^*]+)\*/);
+      if (techItalic) {
+        subtitle = techItalic[1].trim();
+        technologies = subtitle.replace(/\([^)]*\)/, "").trim().split(/[,&/|]/).map((s) => s.trim()).filter(Boolean);
+      }
+
+      const descMatch = b.match(/\*\*Description:?\*\*:\s*([^\n\r]+)/i);
+      let desc = descMatch ? descMatch[1].trim() : "";
+
+      const bullets = [];
+      const lines = b.split("\n").map((l) => l.trim()).filter(Boolean);
+      for (const line of lines) {
+        if (/^[-*•]\s+/.test(line) && !line.includes(`**${name}**`)) {
+          bullets.push(line.replace(/^[-*•]\s+/, ""));
+        } else if (!desc && !line.includes(`**${name}**`) && !line.startsWith("*") && line.length > 20) {
+          desc = line;
+        }
+      }
+
+      patch.projects.push({
+        name,
+        description: desc || subtitle || (bullets[0] || ""),
+        highlights: bullets,
+        technologies,
+      });
+    }
+  }
+
+  // Skills
+  const skillSection = text.match(/###\s*[^#\n]*Skills([\s\S]*?)(?=###|$)/i);
+  if (skillSection) {
+    const skillLines = skillSection[1].split(/\n/).filter((l) => l.includes("**"));
+    const techSkills = [];
+    const toolSkills = [];
+    for (const line of skillLines) {
+      const m = line.match(/\*\*([^*:]+):?\*\*[:\s]*([^\n\r]+)/);
+      if (m) {
+        const cat = m[1].toLowerCase();
+        const vals = m[2].split(/[,|]/).map((s) => s.trim()).filter(Boolean);
+        if (cat.includes("tool") || cat.includes("framework")) {
+          toolSkills.push(...vals);
+        } else {
+          techSkills.push(...vals);
+        }
+      }
+    }
+    if (techSkills.length > 0 || toolSkills.length > 0) {
+      patch.skills = { technical: techSkills, tools: toolSkills, soft: [] };
+    }
+  }
+
+  const hasData = patch.summary || patch.education.length > 0 || patch.projects.length > 0 || patch.personal.fullName;
+  return hasData ? patch : null;
+}
+
     if (scope === "chat-assistant") {
       const { message: userMessage, history = [], draftState = null } = req.body || {};
 
@@ -916,14 +1098,76 @@ router.post("/", optionalAuthenticateToken, async (req, res) => {
         "- Quantify achievements with metrics and percentage gains wherever possible.",
         "- When full data is provided, enthusiastically confirm that you have parsed their entire background and prepared 1-click proposals for all sections.",
         toneDirective,
-        'Respond strictly as JSON with "reply" (string in markdown containing your conversational text and <<act:...>> tags on standalone lines) and optional "patch" (legacy object for backward compatibility).',
+        "- CRITICAL FOR 1-CLICK APPLY: When the user provides their background/CV, ALWAYS include the structured 'patch' object in your JSON response containing { personal, summary, education, projects, skills, workExperience }. Keep your conversational 'reply' concise (under 80 words) and summarize the proposals so you never run out of tokens before finishing.",
+        'Respond strictly as JSON with "reply" (string in markdown containing your conversational text and optional <<act:...>> tags on standalone lines) and "patch" (object containing the structured updates).',
       ].join("\n");
+
+      // Keep conversation history and context compact to prevent token overflows
+      const compactHistory = Array.isArray(history)
+        ? history.slice(-4).map((h) => ({
+            role: h.role === "user" ? "user" : "assistant",
+            content: typeof h.content === "string" ? h.content.slice(0, 400) : "",
+          }))
+        : [];
+
+      const compactResume = {
+        basics: normalizedResume.basics,
+        work: (normalizedResume.work || []).slice(0, 3).map((w) => ({
+          company: w.company,
+          position: w.position,
+          highlights: (w.highlights || []).slice(0, 3),
+        })),
+        education: (normalizedResume.education || []).slice(0, 2),
+        projects: (normalizedResume.projects || []).slice(0, 3),
+        skills: (normalizedResume.skills || []).slice(0, 15),
+      };
 
       const json = await generateJson({
         system,
-        user: { message: userMessage, history, resumeData: normalizedResume },
+        user: { message: userMessage, history: compactHistory, resumeData: compactResume },
         models: customModels,
+        preferredEngine: copilotPref.aiModel === "groq-llama-70b" ? "groq" : undefined,
       });
+
+      let patch = json?.patch || null;
+      if (typeof patch === "string") {
+        try {
+          patch = JSON.parse(patch);
+        } catch (_) {}
+      }
+
+      // If model returned <<act:generateResume ...>> or other action envelopes in reply but omitted patch, synthesize patch
+      if ((!patch || (typeof patch === "object" && Object.keys(patch).length === 0)) && json?.reply) {
+        const genMatch = json.reply.match(/<<act:generateResume\s+([\s\S]*?)>>/);
+        if (genMatch) {
+          try {
+            patch = JSON.parse(genMatch[1].trim());
+          } catch (_) {}
+        }
+        if (!patch) {
+          const actRegex = /<<act:([a-zA-Z0-9_-]+)\s+([\s\S]*?)>>/g;
+          let m;
+          const extractedActs = [];
+          while ((m = actRegex.exec(json.reply)) !== null) {
+            try {
+              extractedActs.push({ actionName: m[1], payload: JSON.parse(m[2].trim()) });
+            } catch (_) {}
+          }
+          if (extractedActs.length === 1) {
+            patch = extractedActs[0].payload;
+          } else if (extractedActs.length > 1) {
+            patch = {};
+            extractedActs.forEach((act) => {
+              patch[act.actionName] = act.payload;
+            });
+          }
+        }
+
+        // Fallback: If no action envelopes were emitted, robustly parse markdown reply to synthesize patch
+        if (!patch) {
+          patch = parseMarkdownToPatch(json.reply);
+        }
+      }
 
       if (userId) {
         User.findByIdAndUpdate(userId, { $inc: { "usage.aiRewrites": 1 } }).catch(() => {});
@@ -931,7 +1175,7 @@ router.post("/", optionalAuthenticateToken, async (req, res) => {
 
       return res.json({
         reply: json?.reply || "Here are recommendations to elevate your resume.",
-        patch: json?.patch || null,
+        patch,
       });
     }
 

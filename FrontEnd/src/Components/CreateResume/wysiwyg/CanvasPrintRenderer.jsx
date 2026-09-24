@@ -36,17 +36,20 @@ export default function CanvasPrintRenderer({
 
   const linkedinRaw =
     basics.linkedin ||
-    (basics.profiles || []).find((p) => p.network?.toLowerCase() === "linkedin")?.username ||
+    (basics.profiles || []).find((p) => p.network?.toLowerCase() === "linkedin")
+      ?.username ||
     "";
   const githubRaw =
     basics.github ||
-    (basics.profiles || []).find((p) => p.network?.toLowerCase() === "github")?.username ||
+    (basics.profiles || []).find((p) => p.network?.toLowerCase() === "github")
+      ?.username ||
     "";
 
   const rawItems = [
     basics.email,
     basics.phone,
-    basics.location?.city || (typeof basics.location === "string" ? basics.location : ""),
+    basics.location?.city ||
+      (typeof basics.location === "string" ? basics.location : ""),
     formatLink("url", basics.url),
     formatLink("linkedin", linkedinRaw),
     formatLink("github", githubRaw),
@@ -237,22 +240,26 @@ export default function CanvasPrintRenderer({
           case "header":
             return (
               <header key={index} style={headerWrapperStyle}>
-                <h1 style={nameStyle}>
-                  {basics.name || "Your Name"}
-                </h1>
+                <h1 style={nameStyle}>{basics.name || "Your Name"}</h1>
                 {basics.label && (
                   <div
                     className="text-sm sm:text-base font-medium mt-0.5"
                     style={{
-                      color: layoutVariant === "developer" ? primaryColor : "#374151",
-                      fontFamily: layoutVariant === "developer" ? "monospace" : undefined,
+                      color:
+                        layoutVariant === "developer"
+                          ? primaryColor
+                          : "#374151",
+                      fontFamily:
+                        layoutVariant === "developer" ? "monospace" : undefined,
                     }}
                   >
                     {basics.label}
                   </div>
                 )}
                 {contactItems.length > 0 && (
-                  <div className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-2 text-xs text-gray-700 ${contactJustify}`}>
+                  <div
+                    className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-2 text-xs text-gray-700 ${contactJustify}`}
+                  >
                     {contactItems.map((item, idx) => (
                       <React.Fragment key={idx}>
                         {idx > 0 && <span className="text-gray-400">•</span>}
@@ -267,12 +274,18 @@ export default function CanvasPrintRenderer({
           case "summary":
             if (!block.content) return null;
             return (
-              <section key={index} className={layoutVariant === "compact" ? "mb-3" : "mb-5"}>
+              <section
+                key={index}
+                className={layoutVariant === "compact" ? "mb-3" : "mb-5"}
+              >
                 {renderSectionHeading(block.title || "Professional Summary")}
                 <p
                   className="text-xs sm:text-sm text-gray-800 leading-relaxed whitespace-pre-line"
                   style={{
-                    fontFamily: layoutVariant === "executive" ? "Georgia, serif" : undefined,
+                    fontFamily:
+                      layoutVariant === "executive"
+                        ? "Georgia, serif"
+                        : undefined,
                   }}
                 >
                   {block.content}
@@ -282,17 +295,23 @@ export default function CanvasPrintRenderer({
 
           case "work": {
             const entries = (block.entries || []).filter(
-              (e) => e.company || e.position || e.summary || (e.highlights && e.highlights.length > 0),
+              (e) =>
+                e.company ||
+                e.position ||
+                e.summary ||
+                (e.highlights && e.highlights.length > 0),
             );
             if (entries.length === 0) return null;
 
             return (
-              <section key={index} className={layoutVariant === "compact" ? "mb-3" : "mb-5"}>
+              <section
+                key={index}
+                className={layoutVariant === "compact" ? "mb-3" : "mb-5"}
+              >
                 {renderSectionHeading(block.title || "Work Experience")}
                 <div className="space-y-4">
                   {entries.map((item, i) => {
                     const bullets = item.summary
-
                       ? item.summary.split("\n").filter(Boolean)
                       : item.highlights || [];
 
@@ -311,7 +330,8 @@ export default function CanvasPrintRenderer({
                             )}
                           </div>
                           <div className="text-xs font-medium text-gray-700">
-                            {item.startDate} {item.endDate ? `– ${item.endDate}` : ""}
+                            {item.startDate}{" "}
+                            {item.endDate ? `– ${item.endDate}` : ""}
                             {item.location ? ` | ${item.location}` : ""}
                           </div>
                         </div>
@@ -339,7 +359,10 @@ export default function CanvasPrintRenderer({
             if (entries.length === 0) return null;
 
             return (
-              <section key={index} className={layoutVariant === "compact" ? "mb-3" : "mb-5"}>
+              <section
+                key={index}
+                className={layoutVariant === "compact" ? "mb-3" : "mb-5"}
+              >
                 {renderSectionHeading(block.title || "Education")}
                 <div className="space-y-2.5">
                   {entries.map((item, i) => (
@@ -358,7 +381,8 @@ export default function CanvasPrintRenderer({
                           )}
                         </div>
                         <div className="text-xs font-medium text-gray-700">
-                          {item.startDate} {item.endDate ? `– ${item.endDate}` : ""}
+                          {item.startDate}{" "}
+                          {item.endDate ? `– ${item.endDate}` : ""}
                         </div>
                       </div>
                       {item.score && (
@@ -385,15 +409,28 @@ export default function CanvasPrintRenderer({
             if (groups.length === 0) return null;
 
             return (
-              <section key={index} className={layoutVariant === "compact" ? "mb-3" : "mb-5"}>
+              <section
+                key={index}
+                className={layoutVariant === "compact" ? "mb-3" : "mb-5"}
+              >
                 {renderSectionHeading(block.title || "Skills & Competencies")}
                 <div className="text-xs sm:text-sm text-gray-800 space-y-1.5">
                   {groups.map((group, gi) => (
-                    <div key={gi} className="flex items-baseline flex-wrap gap-x-2">
+                    <div
+                      key={gi}
+                      className="flex items-baseline flex-wrap gap-x-2"
+                    >
                       <span className="font-bold text-gray-900">
                         {group.name}:
                       </span>
-                      <span style={{ fontFamily: layoutVariant === "developer" ? "monospace" : undefined }}>
+                      <span
+                        style={{
+                          fontFamily:
+                            layoutVariant === "developer"
+                              ? "monospace"
+                              : undefined,
+                        }}
+                      >
                         {(group.keywords || []).join(", ")}
                       </span>
                     </div>
@@ -410,7 +447,10 @@ export default function CanvasPrintRenderer({
             if (entries.length === 0) return null;
 
             return (
-              <section key={index} className={layoutVariant === "compact" ? "mb-3" : "mb-5"}>
+              <section
+                key={index}
+                className={layoutVariant === "compact" ? "mb-3" : "mb-5"}
+              >
                 {renderSectionHeading(block.title || "Key Projects")}
                 <div className="space-y-2.5">
                   {entries.map((proj, pi) => (
@@ -447,7 +487,10 @@ export default function CanvasPrintRenderer({
             if (entries.length === 0) return null;
 
             return (
-              <section key={index} className={layoutVariant === "compact" ? "mb-2.5" : "mb-4"}>
+              <section
+                key={index}
+                className={layoutVariant === "compact" ? "mb-2.5" : "mb-4"}
+              >
                 {renderSectionHeading(block.title || "Languages")}
                 <div className="text-xs sm:text-sm text-gray-800 flex flex-wrap gap-x-4 gap-y-1">
                   {entries.map((l, li) => (
@@ -472,7 +515,10 @@ export default function CanvasPrintRenderer({
             if (entries.length === 0) return null;
 
             return (
-              <section key={index} className={layoutVariant === "compact" ? "mb-3" : "mb-5"}>
+              <section
+                key={index}
+                className={layoutVariant === "compact" ? "mb-3" : "mb-5"}
+              >
                 {renderSectionHeading(block.title || "Certifications & Awards")}
                 <ul className="list-disc list-outside ml-4 space-y-1 text-xs sm:text-sm text-gray-800">
                   {entries.map((item, i) => (
@@ -493,11 +539,16 @@ export default function CanvasPrintRenderer({
           }
 
           case "volunteer": {
-            const entries = (block.entries || []).filter((v) => v.position || v.organization);
+            const entries = (block.entries || []).filter(
+              (v) => v.position || v.organization,
+            );
             if (entries.length === 0) return null;
 
             return (
-              <section key={index} className={layoutVariant === "compact" ? "mb-3" : "mb-5"}>
+              <section
+                key={index}
+                className={layoutVariant === "compact" ? "mb-3" : "mb-5"}
+              >
                 {renderSectionHeading(block.title || "Volunteer Experience")}
                 <div className="space-y-2.5">
                   {entries.map((item, i) => (
@@ -516,7 +567,8 @@ export default function CanvasPrintRenderer({
                         </div>
                         {(item.startDate || item.endDate) && (
                           <div className="text-xs font-medium text-gray-700">
-                            {item.startDate} {item.endDate ? `– ${item.endDate}` : ""}
+                            {item.startDate}{" "}
+                            {item.endDate ? `– ${item.endDate}` : ""}
                           </div>
                         )}
                       </div>
@@ -537,7 +589,10 @@ export default function CanvasPrintRenderer({
             if (entries.length === 0) return null;
 
             return (
-              <section key={index} className={layoutVariant === "compact" ? "mb-3" : "mb-5"}>
+              <section
+                key={index}
+                className={layoutVariant === "compact" ? "mb-3" : "mb-5"}
+              >
                 {renderSectionHeading(block.title || "Publications")}
                 <div className="space-y-2 text-xs sm:text-sm text-gray-800">
                   {entries.map((item, i) => (
@@ -567,7 +622,10 @@ export default function CanvasPrintRenderer({
             if (entries.length === 0) return null;
 
             return (
-              <section key={index} className={layoutVariant === "compact" ? "mb-2.5" : "mb-4"}>
+              <section
+                key={index}
+                className={layoutVariant === "compact" ? "mb-2.5" : "mb-4"}
+              >
                 {renderSectionHeading(block.title || "Interests")}
                 <div className="text-xs sm:text-sm text-gray-800 space-y-1">
                   {entries.map((item, i) => (
@@ -594,4 +652,3 @@ export default function CanvasPrintRenderer({
     </div>
   );
 }
-

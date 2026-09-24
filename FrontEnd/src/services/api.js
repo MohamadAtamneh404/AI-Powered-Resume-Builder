@@ -10,7 +10,7 @@ import {
 } from "./mockData";
 
 // Preview / Demo mode is enabled by default so the UI works 100% standalone
-const IS_DEMO_MODE = import.meta.env.VITE_DEMO_MODE !== "false";
+export const IS_DEMO_MODE = import.meta.env.VITE_DEMO_MODE !== "false";
 
 // Helper for simulated network latency
 const sleep = (ms = 150) => new Promise((resolve) => setTimeout(resolve, ms));
